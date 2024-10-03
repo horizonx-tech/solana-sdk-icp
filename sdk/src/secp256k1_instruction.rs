@@ -428,7 +428,7 @@
 //!     transaction::Transaction,
 //! };
 //!
-//! fn demo_secp256k1_verify_basic(
+//! async fn demo_secp256k1_verify_basic(
 //!     payer_keypair: &Keypair,
 //!     secp256k1_secret_key: &libsecp256k1::SecretKey,
 //!     client: &RpcClient,
@@ -454,7 +454,7 @@
 //!         Some(&payer_keypair.pubkey()),
 //!         &[payer_keypair],
 //!         blockhash,
-//!     );
+//!     ).await;
 //!
 //!     client.send_and_confirm_transaction(&tx)?;
 //!
@@ -725,7 +725,7 @@
 //!     Ok(instr_data)
 //! }
 //!
-//! fn demo_secp256k1_custom_many(
+//! async fn demo_secp256k1_custom_many(
 //!     payer_keypair: &Keypair,
 //!     client: &RpcClient,
 //!     program_keypair: &Keypair,
@@ -777,7 +777,7 @@
 //!         Some(&payer_keypair.pubkey()),
 //!         &[payer_keypair],
 //!         blockhash,
-//!     );
+//!     ).await;
 //!
 //!     client.send_and_confirm_transaction(&tx)?;
 //!
@@ -1231,7 +1231,8 @@ pub mod test {
             Some(&mint_keypair.pubkey()),
             &[&mint_keypair],
             Hash::default(),
-        ).await;
+        )
+        .await;
 
         assert!(tx.verify_precompiles(&feature_set).is_ok());
 
@@ -1242,7 +1243,8 @@ pub mod test {
             Some(&mint_keypair.pubkey()),
             &[&mint_keypair],
             Hash::default(),
-        ).await;
+        )
+        .await;
         assert!(tx.verify_precompiles(&feature_set).is_err());
     }
 

@@ -96,6 +96,7 @@ hex = { workspace = true }
 solana-sdk = { path = ".", features = ["dev-context-only-utils"] }
 static_assertions = { workspace = true }
 tiny-bip39 = { workspace = true }
+tokio-test = "0.4.4"
 
 [build-dependencies]
 rustc_version = { workspace = true }

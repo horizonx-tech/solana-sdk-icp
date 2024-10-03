@@ -289,7 +289,7 @@ mod tests {
     }
 
     #[tokio::test]
-async    fn tx_uses_nonce_ok() {
+    async fn tx_uses_nonce_ok() {
         let (_, _, tx) = nonced_transfer_tx().await;
         assert!(tx.uses_durable_nonce());
     }
@@ -300,7 +300,7 @@ async    fn tx_uses_nonce_ok() {
     }
 
     #[tokio::test]
-async    fn tx_uses_nonce_bad_prog_id_idx_fail() {
+    async fn tx_uses_nonce_bad_prog_id_idx_fail() {
         let (_, _, mut tx) = nonced_transfer_tx().await;
         match &mut tx.message {
             VersionedMessage::Legacy(message) => {
@@ -312,7 +312,7 @@ async    fn tx_uses_nonce_bad_prog_id_idx_fail() {
     }
 
     #[tokio::test]
-async    fn tx_uses_nonce_first_prog_id_not_nonce_fail() {
+    async fn tx_uses_nonce_first_prog_id_not_nonce_fail() {
         let from_keypair = Keypair::new();
         let from_pubkey = from_keypair.pubkey();
         let nonce_keypair = Keypair::new();
@@ -328,7 +328,7 @@ async    fn tx_uses_nonce_first_prog_id_not_nonce_fail() {
     }
 
     #[tokio::test]
-async    fn tx_uses_ro_nonce_account() {
+    async fn tx_uses_ro_nonce_account() {
         let from_keypair = Keypair::new();
         let from_pubkey = from_keypair.pubkey();
         let nonce_keypair = Keypair::new();
@@ -349,13 +349,14 @@ async    fn tx_uses_ro_nonce_account() {
             Some(&from_pubkey),
             &[&from_keypair, &nonce_keypair],
             Hash::default(),
-        ).await;
+        )
+        .await;
         let tx = VersionedTransaction::from(tx);
         assert!(!tx.uses_durable_nonce());
     }
 
     #[tokio::test]
-async    fn tx_uses_nonce_wrong_first_nonce_ix_fail() {
+    async fn tx_uses_nonce_wrong_first_nonce_ix_fail() {
         let from_keypair = Keypair::new();
         let from_pubkey = from_keypair.pubkey();
         let nonce_keypair = Keypair::new();

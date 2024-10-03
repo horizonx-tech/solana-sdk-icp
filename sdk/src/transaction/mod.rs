@@ -75,7 +75,7 @@
 //!     Withdraw { lamports: u64 },
 //! }
 //!
-//! fn send_initialize_tx(
+//! async fn send_initialize_tx(
 //!     client: &RpcClient,
 //!     program_id: Pubkey,
 //!     payer: &Keypair
@@ -95,7 +95,7 @@
 //!         Some(&payer.pubkey()),
 //!         &[payer],
 //!         blockhash,
-//!     );
+//!     ).await;
 //!     client.send_and_confirm_transaction(&tx)?;
 //!
 //!     Ok(())
@@ -104,7 +104,8 @@
 //! # let client = RpcClient::new(String::new());
 //! # let program_id = Pubkey::new_unique();
 //! # let payer = Keypair::new();
-//! # send_initialize_tx(&client, program_id, &payer)?;
+//! # tokio_test::block_on(async {send_initialize_tx(&client, program_id, &payer).await.unwrap()});
+//! #
 //! #
 //! # Ok::<(), anyhow::Error>(())
 //! ```
@@ -313,7 +314,7 @@ impl Transaction {
     ///     Withdraw { lamports: u64 },
     /// }
     ///
-    /// fn send_initialize_tx(
+    /// async fn send_initialize_tx(
     ///     client: &RpcClient,
     ///     program_id: Pubkey,
     ///     payer: &Keypair
@@ -333,7 +334,7 @@ impl Transaction {
     ///     );
     ///
     ///     let blockhash = client.get_latest_blockhash()?;
-    ///     let mut tx = Transaction::new(&[payer], message, blockhash);
+    ///     let mut tx = Transaction::new(&[payer], message, blockhash).await;
     ///     client.send_and_confirm_transaction(&tx)?;
     ///
     ///     Ok(())
@@ -342,7 +343,7 @@ impl Transaction {
     /// # let client = RpcClient::new(String::new());
     /// # let program_id = Pubkey::new_unique();
     /// # let payer = Keypair::new();
-    /// # send_initialize_tx(&client, program_id, &payer)?;
+    /// # tokio_test::block_on(async {send_initialize_tx(&client, program_id, &payer).await.unwrap()});
     /// #
     /// # Ok::<(), anyhow::Error>(())
     /// ```
@@ -392,7 +393,7 @@ impl Transaction {
     ///     Withdraw { lamports: u64 },
     /// }
     ///
-    /// fn send_initialize_tx(
+    /// async fn send_initialize_tx(
     ///     client: &RpcClient,
     ///     program_id: Pubkey,
     ///     payer: &Keypair
@@ -408,7 +409,7 @@ impl Transaction {
     ///
     ///     let mut tx = Transaction::new_with_payer(&[instruction], Some(&payer.pubkey()));
     ///     let blockhash = client.get_latest_blockhash()?;
-    ///     tx.sign(&[payer], blockhash);
+    ///     tx.sign(&[payer], blockhash).await;
     ///     client.send_and_confirm_transaction(&tx)?;
     ///
     ///     Ok(())
@@ -417,8 +418,7 @@ impl Transaction {
     /// # let client = RpcClient::new(String::new());
     /// # let program_id = Pubkey::new_unique();
     /// # let payer = Keypair::new();
-    /// # send_initialize_tx(&client, program_id, &payer)?;
-    /// #
+    /// # tokio_test::block_on(async {send_initialize_tx(&client, program_id, &payer).await.unwrap()});
     /// # Ok::<(), anyhow::Error>(())
     /// ```
     pub fn new_with_payer(instructions: &[Instruction], payer: Option<&Pubkey>) -> Self {
@@ -468,7 +468,7 @@ impl Transaction {
     ///     Withdraw { lamports: u64 },
     /// }
     ///
-    /// fn send_initialize_tx(
+    /// async fn send_initialize_tx(
     ///     client: &RpcClient,
     ///     program_id: Pubkey,
     ///     payer: &Keypair
@@ -488,7 +488,7 @@ impl Transaction {
     ///         Some(&payer.pubkey()),
     ///         &[payer],
     ///         blockhash,
-    ///     );
+    ///     ).await;
     ///     client.send_and_confirm_transaction(&tx)?;
     ///
     ///     Ok(())
@@ -497,7 +497,7 @@ impl Transaction {
     /// # let client = RpcClient::new(String::new());
     /// # let program_id = Pubkey::new_unique();
     /// # let payer = Keypair::new();
-    /// # send_initialize_tx(&client, program_id, &payer)?;
+    /// # tokio_test::block_on(async {send_initialize_tx(&client, program_id, &payer).await.unwrap()});
     /// #
     /// # Ok::<(), anyhow::Error>(())
     /// ```
@@ -731,7 +731,11 @@ impl Transaction {
     /// handle the error. See the documentation for
     /// [`Transaction::try_partial_sign`] for a full description of failure
     /// conditions.
-    pub async fn partial_sign<T: Signers + ?Sized>(&mut self, keypairs: &T, recent_blockhash: Hash) {
+    pub async fn partial_sign<T: Signers + ?Sized>(
+        &mut self,
+        keypairs: &T,
+        recent_blockhash: Hash,
+    ) {
         if let Err(e) = self.try_partial_sign(keypairs, recent_blockhash).await {
             panic!("Transaction::partial_sign failed with error {e:?}");
         }
@@ -756,7 +760,10 @@ impl Transaction {
         positions: Vec<usize>,
         recent_blockhash: Hash,
     ) {
-        if let Err(e) = self.try_partial_sign_unchecked(keypairs, positions, recent_blockhash).await {
+        if let Err(e) = self
+            .try_partial_sign_unchecked(keypairs, positions, recent_blockhash)
+            .await
+        {
             panic!("Transaction::partial_sign_unchecked failed with error {e:?}");
         }
     }
@@ -814,7 +821,7 @@ impl Transaction {
     ///     Withdraw { lamports: u64 },
     /// }
     ///
-    /// fn send_initialize_tx(
+    /// async fn send_initialize_tx(
     ///     client: &RpcClient,
     ///     program_id: Pubkey,
     ///     payer: &Keypair
@@ -830,7 +837,7 @@ impl Transaction {
     ///
     ///     let mut tx = Transaction::new_with_payer(&[instruction], Some(&payer.pubkey()));
     ///     let blockhash = client.get_latest_blockhash()?;
-    ///     tx.try_sign(&[payer], blockhash)?;
+    ///     tx.try_sign(&[payer], blockhash).await?;
     ///     client.send_and_confirm_transaction(&tx)?;
     ///
     ///     Ok(())
@@ -839,7 +846,7 @@ impl Transaction {
     /// # let client = RpcClient::new(String::new());
     /// # let program_id = Pubkey::new_unique();
     /// # let payer = Keypair::new();
-    /// # send_initialize_tx(&client, program_id, &payer)?;
+    /// # tokio_test::block_on(async {send_initialize_tx(&client, program_id, &payer).await.unwrap()});
     /// #
     /// # Ok::<(), anyhow::Error>(())
     /// ```
@@ -916,7 +923,8 @@ impl Transaction {
             return Err(SignerError::KeypairPubkeyMismatch);
         }
         let positions: Vec<usize> = positions.iter().map(|pos| pos.unwrap()).collect();
-        self.try_partial_sign_unchecked(keypairs, positions, recent_blockhash).await
+        self.try_partial_sign_unchecked(keypairs, positions, recent_blockhash)
+            .await
     }
 
     /// Sign the transaction with a subset of required keys, returning any
@@ -1132,7 +1140,7 @@ mod tests {
     }
 
     #[tokio::test]
-   async fn test_refs() {
+    async fn test_refs() {
         let key = Keypair::new();
         let key1 = solana_sdk::pubkey::new_rand();
         let key2 = solana_sdk::pubkey::new_rand();
@@ -1148,7 +1156,8 @@ mod tests {
             Hash::default(),
             vec![prog1, prog2],
             instructions,
-        ).await;
+        )
+        .await;
         assert!(tx.sanitize().is_ok());
 
         assert_eq!(tx.key(0, 0), Some(&key.pubkey()));
@@ -1183,7 +1192,8 @@ mod tests {
             Hash::default(),
             vec![],
             instructions,
-        ).await;
+        )
+        .await;
         assert_eq!(tx.sanitize(), Err(SanitizeError::IndexOutOfBounds));
     }
     #[tokio::test]
@@ -1196,7 +1206,8 @@ mod tests {
             Hash::default(),
             vec![Pubkey::default()],
             instructions,
-        ).await;
+        )
+        .await;
         assert_eq!(*get_program_id(&tx, 0), Pubkey::default());
         assert_eq!(tx.sanitize(), Err(SanitizeError::IndexOutOfBounds));
     }
@@ -1262,7 +1273,7 @@ mod tests {
         assert_eq!(tx.sanitize(), Err(SanitizeError::IndexOutOfBounds));
     }
 
-async    fn create_sample_transaction() -> Transaction {
+    async fn create_sample_transaction() -> Transaction {
         let keypair = Keypair::from_bytes(&[
             255, 101, 36, 24, 124, 23, 167, 21, 132, 204, 155, 5, 185, 58, 121, 75, 156, 227, 116,
             193, 215, 38, 142, 22, 8, 14, 229, 239, 119, 93, 5, 218, 36, 100, 158, 252, 33, 161,
@@ -1352,7 +1363,7 @@ async    fn create_sample_transaction() -> Transaction {
     /// Detect binary changes in the serialized transaction data, which could have a downstream
     /// affect on SDKs and applications
     #[tokio::test]
-   async fn test_sdk_serialize() {
+    async fn test_sdk_serialize() {
         assert_eq!(
             serialize(&create_sample_transaction().await).unwrap(),
             vec![
@@ -1370,17 +1381,19 @@ async    fn create_sample_transaction() -> Transaction {
         );
     }
 
-    #[test]
+    #[tokio::test]
     #[should_panic]
-    fn test_transaction_missing_key() {
+    async fn test_transaction_missing_key() {
         let keypair = Keypair::new();
         let message = Message::new(&[], None);
-        Transaction::new_unsigned(message).sign(&[&keypair], Hash::default());
+        Transaction::new_unsigned(message)
+            .sign(&[&keypair], Hash::default())
+            .await;
     }
 
-    #[test]
+    #[tokio::test]
     #[should_panic]
-    fn test_partial_sign_mismatched_key() {
+    async fn test_partial_sign_mismatched_key() {
         let keypair = Keypair::new();
         let fee_payer = solana_sdk::pubkey::new_rand();
         let ix = Instruction::new_with_bincode(
@@ -1389,11 +1402,13 @@ async    fn create_sample_transaction() -> Transaction {
             vec![AccountMeta::new(fee_payer, true)],
         );
         let message = Message::new(&[ix], Some(&fee_payer));
-        Transaction::new_unsigned(message).partial_sign(&[&keypair], Hash::default());
+        Transaction::new_unsigned(message)
+            .partial_sign(&[&keypair], Hash::default())
+            .await;
     }
 
-    #[test]
-    fn test_partial_sign() {
+    #[tokio::test]
+    async fn test_partial_sign() {
         let keypair0 = Keypair::new();
         let keypair1 = Keypair::new();
         let keypair2 = Keypair::new();
@@ -1409,50 +1424,55 @@ async    fn create_sample_transaction() -> Transaction {
         let message = Message::new(&[ix], Some(&keypair0.pubkey()));
         let mut tx = Transaction::new_unsigned(message);
 
-        tx.partial_sign(&[&keypair0, &keypair2], Hash::default());
+        tx.partial_sign(&[&keypair0, &keypair2], Hash::default())
+            .await;
         assert!(!tx.is_signed());
-        tx.partial_sign(&[&keypair1], Hash::default());
+        tx.partial_sign(&[&keypair1], Hash::default()).await;
         assert!(tx.is_signed());
 
         let hash = hash(&[1]);
-        tx.partial_sign(&[&keypair1], hash);
+        tx.partial_sign(&[&keypair1], hash).await;
         assert!(!tx.is_signed());
-        tx.partial_sign(&[&keypair0, &keypair2], hash);
+        tx.partial_sign(&[&keypair0, &keypair2], hash).await;
         assert!(tx.is_signed());
     }
 
-    #[test]
+    #[tokio::test]
     #[should_panic]
-    fn test_transaction_missing_keypair() {
+    async fn test_transaction_missing_keypair() {
         let program_id = Pubkey::default();
         let keypair0 = Keypair::new();
         let id0 = keypair0.pubkey();
         let ix = Instruction::new_with_bincode(program_id, &0, vec![AccountMeta::new(id0, true)]);
         let message = Message::new(&[ix], Some(&id0));
-        Transaction::new_unsigned(message).sign(&Vec::<&Keypair>::new(), Hash::default());
+        Transaction::new_unsigned(message)
+            .sign(&Vec::<&Keypair>::new(), Hash::default())
+            .await;
     }
 
-    #[test]
+    #[tokio::test]
     #[should_panic]
-    fn test_transaction_wrong_key() {
+    async fn test_transaction_wrong_key() {
         let program_id = Pubkey::default();
         let keypair0 = Keypair::new();
         let wrong_id = Pubkey::default();
         let ix =
             Instruction::new_with_bincode(program_id, &0, vec![AccountMeta::new(wrong_id, true)]);
         let message = Message::new(&[ix], Some(&wrong_id));
-        Transaction::new_unsigned(message).sign(&[&keypair0], Hash::default());
+        Transaction::new_unsigned(message)
+            .sign(&[&keypair0], Hash::default())
+            .await;
     }
 
-    #[test]
-    fn test_transaction_correct_key() {
+    #[tokio::test]
+    async fn test_transaction_correct_key() {
         let program_id = Pubkey::default();
         let keypair0 = Keypair::new();
         let id0 = keypair0.pubkey();
         let ix = Instruction::new_with_bincode(program_id, &0, vec![AccountMeta::new(id0, true)]);
         let message = Message::new(&[ix], Some(&id0));
         let mut tx = Transaction::new_unsigned(message);
-        tx.sign(&[&keypair0], Hash::default());
+        tx.sign(&[&keypair0], Hash::default()).await;
         assert_eq!(
             tx.message.instructions[0],
             CompiledInstruction::new(1, &0, vec![0])
@@ -1460,8 +1480,8 @@ async    fn create_sample_transaction() -> Transaction {
         assert!(tx.is_signed());
     }
 
-    #[test]
-    fn test_transaction_instruction_with_duplicate_keys() {
+    #[tokio::test]
+    async fn test_transaction_instruction_with_duplicate_keys() {
         let program_id = Pubkey::default();
         let keypair0 = Keypair::new();
         let id0 = keypair0.pubkey();
@@ -1478,7 +1498,7 @@ async    fn create_sample_transaction() -> Transaction {
         );
         let message = Message::new(&[ix], Some(&id0));
         let mut tx = Transaction::new_unsigned(message);
-        tx.sign(&[&keypair0], Hash::default());
+        tx.sign(&[&keypair0], Hash::default()).await;
         assert_eq!(
             tx.message.instructions[0],
             CompiledInstruction::new(2, &0, vec![0, 1, 0, 1])
@@ -1584,7 +1604,7 @@ async    fn create_sample_transaction() -> Transaction {
     }
 
     #[tokio::test]
-  async  fn tx_uses_ro_nonce_account() {
+    async fn tx_uses_ro_nonce_account() {
         let from_keypair = Keypair::new();
         let from_pubkey = from_keypair.pubkey();
         let nonce_keypair = Keypair::new();
@@ -1605,12 +1625,13 @@ async    fn create_sample_transaction() -> Transaction {
             Some(&from_pubkey),
             &[&from_keypair, &nonce_keypair],
             Hash::default(),
-        ).await;
+        )
+        .await;
         assert!(uses_durable_nonce(&tx).is_none());
     }
 
     #[tokio::test]
-async    fn tx_uses_nonce_wrong_first_nonce_ix_fail() {
+    async fn tx_uses_nonce_wrong_first_nonce_ix_fail() {
         let from_keypair = Keypair::new();
         let from_pubkey = from_keypair.pubkey();
         let nonce_keypair = Keypair::new();
@@ -1630,7 +1651,7 @@ async    fn tx_uses_nonce_wrong_first_nonce_ix_fail() {
     }
 
     #[tokio::test]
-async    fn get_nonce_pub_from_ix_ok() {
+    async fn get_nonce_pub_from_ix_ok() {
         let (_, nonce_pubkey, tx) = nonced_transfer_tx().await;
         let nonce_ix = uses_durable_nonce(&tx).unwrap();
         assert_eq!(
@@ -1640,7 +1661,7 @@ async    fn get_nonce_pub_from_ix_ok() {
     }
 
     #[tokio::test]
-async    fn get_nonce_pub_from_ix_no_accounts_fail() {
+    async fn get_nonce_pub_from_ix_no_accounts_fail() {
         let (_, _, tx) = nonced_transfer_tx().await;
         let nonce_ix = uses_durable_nonce(&tx).unwrap();
         let mut nonce_ix = nonce_ix.clone();
@@ -1649,7 +1670,7 @@ async    fn get_nonce_pub_from_ix_no_accounts_fail() {
     }
 
     #[tokio::test]
-async    fn get_nonce_pub_from_ix_bad_acc_idx_fail() {
+    async fn get_nonce_pub_from_ix_bad_acc_idx_fail() {
         let (_, _, tx) = nonced_transfer_tx().await;
         let nonce_ix = uses_durable_nonce(&tx).unwrap();
         let mut nonce_ix = nonce_ix.clone();
@@ -1666,14 +1687,15 @@ async    fn get_nonce_pub_from_ix_bad_acc_idx_fail() {
         let mut tx = Transaction::new_with_payer(&instructions, Some(&from_pubkey));
         let unused_keypair = Keypair::new();
         let err = tx
-            .try_partial_sign(&[&from_keypair, &unused_keypair], Hash::default()).await
+            .try_partial_sign(&[&from_keypair, &unused_keypair], Hash::default())
+            .await
             .unwrap_err();
         assert_eq!(err, SignerError::KeypairPubkeyMismatch);
     }
 
     #[tokio::test]
-async    fn test_unsized_signers() {
-       async fn instructions_to_tx(
+    async fn test_unsized_signers() {
+        async fn instructions_to_tx(
             instructions: &[Instruction],
             signers: Box<impl Signers>,
         ) -> Transaction {

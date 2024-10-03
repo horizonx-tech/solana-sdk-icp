@@ -282,8 +282,8 @@ mod tests {
         solana_program::vote::{self, state::Vote},
     };
 
-    #[test]
-    fn test_try_create_simple_vote_tx() {
+    #[tokio::test]
+    async fn test_try_create_simple_vote_tx() {
         let bank_hash = Hash::default();
         let block_hash = Hash::default();
         let vote_keypair = Keypair::new();
@@ -293,8 +293,8 @@ mod tests {
         let vote_ix =
             vote::instruction::vote(&vote_keypair.pubkey(), &auth_keypair.pubkey(), votes);
         let mut vote_tx = Transaction::new_with_payer(&[vote_ix], Some(&node_keypair.pubkey()));
-        vote_tx.partial_sign(&[&node_keypair], block_hash);
-        vote_tx.partial_sign(&[&auth_keypair], block_hash);
+        vote_tx.partial_sign(&[&node_keypair], block_hash).await;
+        vote_tx.partial_sign(&[&auth_keypair], block_hash).await;
 
         // single legacy vote ix, 2 signatures
         {
