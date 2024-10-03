@@ -32,15 +32,17 @@ macro_rules! default_keypairs_impl {
         }
 
         async fn sign_message(&self, message: &[u8]) -> Vec<Signature> {
-            self.iter()
-                .map(|keypair| keypair.sign_message(message))
-                .collect()
+            let mut signatures = Vec::new();
+            for keypair in self.iter() {
+                signatures.push(keypair.sign_message(message).await);
+            }
+            signatures
         }
 
         async fn try_sign_message(&self, message: &[u8]) -> Result<Vec<Signature>, SignerError> {
             let mut signatures = Vec::new();
             for keypair in self.iter() {
-                signatures.push(keypair.try_sign_message(message)?);
+                signatures.push(keypair.try_sign_message(message).await?);
             }
             Ok(signatures)
         }
@@ -145,14 +147,17 @@ impl<T: Signer> Signers for Vec<&T> {
 
 #[cfg(test)]
 mod tests {
+    use async_trait::async_trait;
+
     use super::*;
 
     struct Foo;
+    #[async_trait]
     impl Signer for Foo {
         fn try_pubkey(&self) -> Result<Pubkey, SignerError> {
             Ok(Pubkey::default())
         }
-        fn try_sign_message(&self, _message: &[u8]) -> Result<Signature, SignerError> {
+        async fn try_sign_message(&self, _message: &[u8]) -> Result<Signature, SignerError> {
             Ok(Signature::default())
         }
         fn is_interactive(&self) -> bool {
@@ -161,11 +166,12 @@ mod tests {
     }
 
     struct Bar;
+    #[async_trait]
     impl Signer for Bar {
         fn try_pubkey(&self) -> Result<Pubkey, SignerError> {
             Ok(Pubkey::default())
         }
-        fn try_sign_message(&self, _message: &[u8]) -> Result<Signature, SignerError> {
+        async fn try_sign_message(&self, _message: &[u8]) -> Result<Signature, SignerError> {
             Ok(Signature::default())
         }
         fn is_interactive(&self) -> bool {

@@ -235,8 +235,8 @@ impl OffchainMessage {
     }
 
     /// Sign the message with provided keypair
-    pub fn sign(&self, signer: &dyn Signer) -> Result<Signature, SanitizeError> {
-        Ok(signer.sign_message(&self.serialize()?))
+    pub async fn sign(&self, signer: &dyn Signer) -> Result<Signature, SanitizeError> {
+        Ok(signer.sign_message(&self.serialize()?).await)
     }
 
     /// Verify that the message signature is valid for the given public key
@@ -292,11 +292,11 @@ mod tests {
         assert_eq!(message, OffchainMessage::deserialize(&serialized).unwrap());
     }
 
-    #[test]
-    fn test_offchain_message_sign_and_verify() {
+    #[tokio::test]
+    async fn test_offchain_message_sign_and_verify() {
         let message = OffchainMessage::new(0, b"Test Message").unwrap();
         let keypair = Keypair::new();
-        let signature = message.sign(&keypair).unwrap();
+        let signature = message.sign(&keypair).await.unwrap();
         assert!(message.verify(&keypair.pubkey(), &signature).unwrap());
     }
 }

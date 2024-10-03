@@ -85,6 +85,10 @@ thiserror = { workspace = true }
 uriparse = { workspace = true }
 wasm-bindgen = { workspace = true }
 tokio.workspace = true
+candid = "0.10.10"
+ic-cdk = "0.16.0"
+anyhow.workspace = true
+async-trait.workspace = true
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 js-sys = { workspace = true }

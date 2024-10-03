@@ -666,7 +666,7 @@
 //!     signatures: &[SecpSignature],
 //!     instruction_index: u8,
 //! ) -> Result<Vec<u8>> {
-//!     assert!(signatures.len() <= u8::max_value().into());
+//!     //assert!(signatures.len() <= u8::max_value().into());
 //!
 //!     // We're going to pack all the signatures into the secp256k1 instruction data.
 //!     // Before our signatures though is the signature offset structures

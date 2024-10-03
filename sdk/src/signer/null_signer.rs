@@ -1,5 +1,7 @@
 #![cfg(feature = "full")]
 
+use async_trait::async_trait;
+
 use crate::{
     pubkey::Pubkey,
     signature::Signature,
@@ -20,12 +22,13 @@ impl NullSigner {
     }
 }
 
+#[async_trait]
 impl Signer for NullSigner {
     fn try_pubkey(&self) -> Result<Pubkey, SignerError> {
         Ok(self.pubkey)
     }
 
-    fn try_sign_message(&self, _message: &[u8]) -> Result<Signature, SignerError> {
+    async fn try_sign_message(&self, _message: &[u8]) -> Result<Signature, SignerError> {
         Ok(Signature::default())
     }
 

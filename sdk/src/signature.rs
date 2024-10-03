@@ -1,6 +1,8 @@
 //! Functionality for public and private keys.
 #![cfg(feature = "full")]
 
+use async_trait::async_trait;
+
 // legacy module paths
 pub use crate::signer::{keypair::*, null_signer::*, presigner::*, *};
 use {
@@ -56,9 +58,10 @@ impl Signature {
     }
 }
 
+#[async_trait]
 pub trait Signable {
-    fn sign(&mut self, keypair: &Keypair) {
-        let signature = keypair.sign_message(self.signable_data().borrow());
+    async fn sign(&mut self, keypair: &Keypair) {
+        let signature = keypair.sign_message(self.signable_data().borrow()).await;
         self.set_signature(signature);
     }
     fn verify(&self) -> bool {
@@ -146,9 +149,9 @@ impl FromStr for Signature {
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test]
-    fn test_signature_fromstr() {
-        let signature = Keypair::new().sign_message(&[0u8]);
+    #[tokio::test]
+    async fn test_signature_fromstr() {
+        let signature = Keypair::new().sign_message(&[0u8]).await;
 
         let mut signature_base58_str = bs58::encode(signature).into_string();
 

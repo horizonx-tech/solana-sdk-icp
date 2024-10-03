@@ -1525,14 +1525,17 @@ mod tests {
         let message = Message::new(&[ix], Some(&pubkey));
         let mut tx = Transaction::new_unsigned(message);
 
-        let presigner_sig = presigner_keypair.sign_message(&tx.message_data());
+        let presigner_sig = presigner_keypair.sign_message(&tx.message_data()).await;
         let presigner = Presigner::new(&presigner_pubkey, &presigner_sig);
 
         let signers: Vec<&dyn Signer> = vec![&keypair, &presigner];
 
         let res = tx.try_sign(&signers, Hash::default()).await;
         assert_eq!(res, Ok(()));
-        assert_eq!(tx.signatures[0], keypair.sign_message(&tx.message_data()));
+        assert_eq!(
+            tx.signatures[0],
+            keypair.sign_message(&tx.message_data()).await
+        );
         assert_eq!(tx.signatures[1], presigner_sig);
 
         // Wrong key should error, not panic
