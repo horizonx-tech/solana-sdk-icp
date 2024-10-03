@@ -1211,8 +1211,8 @@ pub mod test {
         );
     }
 
-    #[test]
-    fn test_secp256k1() {
+    #[tokio::test]
+    async fn test_secp256k1() {
         solana_logger::setup();
         let offsets = SecpSignatureOffsets::default();
         assert_eq!(
@@ -1231,7 +1231,7 @@ pub mod test {
             Some(&mint_keypair.pubkey()),
             &[&mint_keypair],
             Hash::default(),
-        );
+        ).await;
 
         assert!(tx.verify_precompiles(&feature_set).is_ok());
 
@@ -1242,7 +1242,7 @@ pub mod test {
             Some(&mint_keypair.pubkey()),
             &[&mint_keypair],
             Hash::default(),
-        );
+        ).await;
         assert!(tx.verify_precompiles(&feature_set).is_err());
     }
 

@@ -204,19 +204,19 @@ pub trait AsyncClient {
 
     /// Create a transaction from the given message, and send it to the
     /// server, but don't wait for to see if the server accepted it.
-    fn async_send_message<T: Signers + ?Sized>(
+    async fn async_send_message<T: Signers + ?Sized>(
         &self,
         keypairs: &T,
         message: Message,
         recent_blockhash: Hash,
     ) -> Result<Signature> {
-        let transaction = Transaction::new(keypairs, message, recent_blockhash);
+        let transaction = Transaction::new(keypairs, message, recent_blockhash).await;
         self.async_send_transaction(transaction)
     }
 
     /// Create a transaction from a single instruction that only requires
     /// a single signer. Then send it to the server, but don't wait for a reply.
-    fn async_send_instruction(
+    async fn async_send_instruction(
         &self,
         keypair: &Keypair,
         instruction: Instruction,
@@ -224,10 +224,11 @@ pub trait AsyncClient {
     ) -> Result<Signature> {
         let message = Message::new(&[instruction], Some(&keypair.pubkey()));
         self.async_send_message(&[keypair], message, recent_blockhash)
+            .await
     }
 
     /// Attempt to transfer lamports from `keypair` to `pubkey`, but don't wait to confirm.
-    fn async_transfer(
+    async fn async_transfer(
         &self,
         lamports: u64,
         keypair: &Keypair,
@@ -237,5 +238,6 @@ pub trait AsyncClient {
         let transfer_instruction =
             system_instruction::transfer(&keypair.pubkey(), pubkey, lamports);
         self.async_send_instruction(keypair, transfer_instruction, recent_blockhash)
+            .await
     }
 }

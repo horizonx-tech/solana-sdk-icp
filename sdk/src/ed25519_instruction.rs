@@ -343,8 +343,8 @@ pub mod test {
         );
     }
 
-    #[test]
-    fn test_ed25519() {
+    #[tokio::test]
+    async fn test_ed25519() {
         solana_logger::setup();
 
         let privkey = ed25519_dalek::Keypair::generate(&mut thread_rng());
@@ -358,7 +358,7 @@ pub mod test {
             Some(&mint_keypair.pubkey()),
             &[&mint_keypair],
             Hash::default(),
-        );
+        ).await;
 
         assert!(tx.verify_precompiles(&feature_set).is_ok());
 
@@ -376,7 +376,7 @@ pub mod test {
             Some(&mint_keypair.pubkey()),
             &[&mint_keypair],
             Hash::default(),
-        );
+        ).await;
         assert!(tx.verify_precompiles(&feature_set).is_err());
     }
 }

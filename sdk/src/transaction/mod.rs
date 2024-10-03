@@ -346,13 +346,13 @@ impl Transaction {
     /// #
     /// # Ok::<(), anyhow::Error>(())
     /// ```
-    pub fn new<T: Signers + ?Sized>(
+    pub async fn new<T: Signers + ?Sized>(
         from_keypairs: &T,
         message: Message,
         recent_blockhash: Hash,
     ) -> Transaction {
         let mut tx = Self::new_unsigned(message);
-        tx.sign(from_keypairs, recent_blockhash);
+        tx.sign(from_keypairs, recent_blockhash).await;
         tx
     }
 
@@ -501,14 +501,14 @@ impl Transaction {
     /// #
     /// # Ok::<(), anyhow::Error>(())
     /// ```
-    pub fn new_signed_with_payer<T: Signers + ?Sized>(
+    pub async fn new_signed_with_payer<T: Signers + ?Sized>(
         instructions: &[Instruction],
         payer: Option<&Pubkey>,
         signing_keypairs: &T,
         recent_blockhash: Hash,
     ) -> Self {
         let message = Message::new(instructions, payer);
-        Self::new(signing_keypairs, message, recent_blockhash)
+        Self::new(signing_keypairs, message, recent_blockhash).await
     }
 
     /// Create a fully-signed transaction from pre-compiled instructions.
@@ -526,7 +526,7 @@ impl Transaction {
     ///
     /// Panics when signing fails. See [`Transaction::try_sign`] and for a full
     /// description of failure conditions.
-    pub fn new_with_compiled_instructions<T: Signers + ?Sized>(
+    pub async fn new_with_compiled_instructions<T: Signers + ?Sized>(
         from_keypairs: &T,
         keys: &[Pubkey],
         recent_blockhash: Hash,
@@ -545,7 +545,7 @@ impl Transaction {
             Hash::default(),
             instructions,
         );
-        Transaction::new(from_keypairs, message, recent_blockhash)
+        Transaction::new(from_keypairs, message, recent_blockhash).await
     }
 
     /// Get the data for an instruction at the given index.
@@ -705,8 +705,8 @@ impl Transaction {
     /// #
     /// # Ok::<(), anyhow::Error>(())
     /// ```
-    pub fn sign<T: Signers + ?Sized>(&mut self, keypairs: &T, recent_blockhash: Hash) {
-        if let Err(e) = self.try_sign(keypairs, recent_blockhash) {
+    pub async fn sign<T: Signers + ?Sized>(&mut self, keypairs: &T, recent_blockhash: Hash) {
+        if let Err(e) = self.try_sign(keypairs, recent_blockhash).await {
             panic!("Transaction::sign failed with error {e:?}");
         }
     }
@@ -731,8 +731,8 @@ impl Transaction {
     /// handle the error. See the documentation for
     /// [`Transaction::try_partial_sign`] for a full description of failure
     /// conditions.
-    pub fn partial_sign<T: Signers + ?Sized>(&mut self, keypairs: &T, recent_blockhash: Hash) {
-        if let Err(e) = self.try_partial_sign(keypairs, recent_blockhash) {
+    pub async fn partial_sign<T: Signers + ?Sized>(&mut self, keypairs: &T, recent_blockhash: Hash) {
+        if let Err(e) = self.try_partial_sign(keypairs, recent_blockhash).await {
             panic!("Transaction::partial_sign failed with error {e:?}");
         }
     }
@@ -750,13 +750,13 @@ impl Transaction {
     ///
     /// Panics if signing fails. Use [`Transaction::try_partial_sign_unchecked`]
     /// to handle the error.
-    pub fn partial_sign_unchecked<T: Signers + ?Sized>(
+    pub async fn partial_sign_unchecked<T: Signers + ?Sized>(
         &mut self,
         keypairs: &T,
         positions: Vec<usize>,
         recent_blockhash: Hash,
     ) {
-        if let Err(e) = self.try_partial_sign_unchecked(keypairs, positions, recent_blockhash) {
+        if let Err(e) = self.try_partial_sign_unchecked(keypairs, positions, recent_blockhash).await {
             panic!("Transaction::partial_sign_unchecked failed with error {e:?}");
         }
     }
@@ -843,12 +843,12 @@ impl Transaction {
     /// #
     /// # Ok::<(), anyhow::Error>(())
     /// ```
-    pub fn try_sign<T: Signers + ?Sized>(
+    pub async fn try_sign<T: Signers + ?Sized>(
         &mut self,
         keypairs: &T,
         recent_blockhash: Hash,
     ) -> result::Result<(), SignerError> {
-        self.try_partial_sign(keypairs, recent_blockhash)?;
+        self.try_partial_sign(keypairs, recent_blockhash).await?;
 
         if !self.is_signed() {
             Err(SignerError::NotEnoughSigners)
@@ -906,7 +906,7 @@ impl Transaction {
     /// [`PresignerError::VerificationFailure`]: crate::signer::presigner::PresignerError::VerificationFailure
     /// [`solana-remote-wallet`]: https://docs.rs/solana-remote-wallet/latest/
     /// [`RemoteKeypair`]: https://docs.rs/solana-remote-wallet/latest/solana_remote_wallet/remote_keypair/struct.RemoteKeypair.html
-    pub fn try_partial_sign<T: Signers + ?Sized>(
+    pub async fn try_partial_sign<T: Signers + ?Sized>(
         &mut self,
         keypairs: &T,
         recent_blockhash: Hash,
@@ -916,7 +916,7 @@ impl Transaction {
             return Err(SignerError::KeypairPubkeyMismatch);
         }
         let positions: Vec<usize> = positions.iter().map(|pos| pos.unwrap()).collect();
-        self.try_partial_sign_unchecked(keypairs, positions, recent_blockhash)
+        self.try_partial_sign_unchecked(keypairs, positions, recent_blockhash).await
     }
 
     /// Sign the transaction with a subset of required keys, returning any
@@ -932,7 +932,7 @@ impl Transaction {
     /// # Errors
     ///
     /// Returns an error if signing fails.
-    pub fn try_partial_sign_unchecked<T: Signers + ?Sized>(
+    pub async fn try_partial_sign_unchecked<T: Signers + ?Sized>(
         &mut self,
         keypairs: &T,
         positions: Vec<usize>,
@@ -946,7 +946,7 @@ impl Transaction {
                 .for_each(|signature| *signature = Signature::default());
         }
 
-        let signatures = keypairs.try_sign_message(&self.message_data())?;
+        let signatures = keypairs.try_sign_message(&self.message_data()).await?;
         for i in 0..positions.len() {
             self.signatures[positions[i]] = signatures[i];
         }
@@ -1131,8 +1131,8 @@ mod tests {
         instruction.program_id(&message.account_keys)
     }
 
-    #[test]
-    fn test_refs() {
+    #[tokio::test]
+   async fn test_refs() {
         let key = Keypair::new();
         let key1 = solana_sdk::pubkey::new_rand();
         let key2 = solana_sdk::pubkey::new_rand();
@@ -1148,7 +1148,7 @@ mod tests {
             Hash::default(),
             vec![prog1, prog2],
             instructions,
-        );
+        ).await;
         assert!(tx.sanitize().is_ok());
 
         assert_eq!(tx.key(0, 0), Some(&key.pubkey()));
@@ -1173,8 +1173,8 @@ mod tests {
         assert_eq!(*get_program_id(&tx, 1), prog2);
     }
 
-    #[test]
-    fn test_refs_invalid_program_id() {
+    #[tokio::test]
+    async fn test_refs_invalid_program_id() {
         let key = Keypair::new();
         let instructions = vec![CompiledInstruction::new(1, &(), vec![])];
         let tx = Transaction::new_with_compiled_instructions(
@@ -1183,11 +1183,11 @@ mod tests {
             Hash::default(),
             vec![],
             instructions,
-        );
+        ).await;
         assert_eq!(tx.sanitize(), Err(SanitizeError::IndexOutOfBounds));
     }
-    #[test]
-    fn test_refs_invalid_account() {
+    #[tokio::test]
+    async fn test_refs_invalid_account() {
         let key = Keypair::new();
         let instructions = vec![CompiledInstruction::new(1, &(), vec![2])];
         let tx = Transaction::new_with_compiled_instructions(
@@ -1196,13 +1196,13 @@ mod tests {
             Hash::default(),
             vec![Pubkey::default()],
             instructions,
-        );
+        ).await;
         assert_eq!(*get_program_id(&tx, 0), Pubkey::default());
         assert_eq!(tx.sanitize(), Err(SanitizeError::IndexOutOfBounds));
     }
 
-    #[test]
-    fn test_sanitize_txs() {
+    #[tokio::test]
+    async fn test_sanitize_txs() {
         let key = Keypair::new();
         let id0 = Pubkey::default();
         let program_id = solana_sdk::pubkey::new_rand();
@@ -1262,7 +1262,7 @@ mod tests {
         assert_eq!(tx.sanitize(), Err(SanitizeError::IndexOutOfBounds));
     }
 
-    fn create_sample_transaction() -> Transaction {
+async    fn create_sample_transaction() -> Transaction {
         let keypair = Keypair::from_bytes(&[
             255, 101, 36, 24, 124, 23, 167, 21, 132, 204, 155, 5, 185, 58, 121, 75, 156, 227, 116,
             193, 215, 38, 142, 22, 8, 14, 229, 239, 119, 93, 5, 218, 36, 100, 158, 252, 33, 161,
@@ -1286,22 +1286,22 @@ mod tests {
         let instruction =
             Instruction::new_with_bincode(program_id, &(1u8, 2u8, 3u8), account_metas);
         let message = Message::new(&[instruction], Some(&keypair.pubkey()));
-        let tx = Transaction::new(&[&keypair], message, Hash::default());
+        let tx = Transaction::new(&[&keypair], message, Hash::default()).await;
         tx.verify().expect("valid sample transaction signatures");
         tx
     }
 
-    #[test]
-    fn test_transaction_serialize() {
-        let tx = create_sample_transaction();
+    #[tokio::test]
+    async fn test_transaction_serialize() {
+        let tx = create_sample_transaction().await;
         let ser = serialize(&tx).unwrap();
         let deser = deserialize(&ser).unwrap();
         assert_eq!(tx, deser);
     }
 
     /// Detect changes to the serialized size of payment transactions, which affects TPS.
-    #[test]
-    fn test_transaction_minimum_serialized_size() {
+    #[tokio::test]
+    async fn test_transaction_minimum_serialized_size() {
         let alice_keypair = Keypair::new();
         let alice_pubkey = alice_keypair.pubkey();
         let bob_pubkey = solana_sdk::pubkey::new_rand();
@@ -1325,7 +1325,7 @@ mod tests {
             "unexpected Instruction::serialized_size"
         );
 
-        let tx = Transaction::new(&[&alice_keypair], message, Hash::default());
+        let tx = Transaction::new(&[&alice_keypair], message, Hash::default()).await;
 
         let len_size = 1;
         let num_required_sigs_size = 1;
@@ -1351,10 +1351,10 @@ mod tests {
 
     /// Detect binary changes in the serialized transaction data, which could have a downstream
     /// affect on SDKs and applications
-    #[test]
-    fn test_sdk_serialize() {
+    #[tokio::test]
+   async fn test_sdk_serialize() {
         assert_eq!(
-            serialize(&create_sample_transaction()).unwrap(),
+            serialize(&create_sample_transaction().await).unwrap(),
             vec![
                 1, 120, 138, 162, 185, 59, 209, 241, 157, 71, 157, 74, 131, 4, 87, 54, 28, 38, 180,
                 222, 82, 64, 62, 61, 62, 22, 46, 17, 203, 187, 136, 62, 43, 11, 38, 235, 17, 239,
@@ -1486,8 +1486,8 @@ mod tests {
         assert!(tx.is_signed());
     }
 
-    #[test]
-    fn test_try_sign_dyn_keypairs() {
+    #[tokio::test]
+    async fn test_try_sign_dyn_keypairs() {
         let program_id = Pubkey::default();
         let keypair = Keypair::new();
         let pubkey = keypair.pubkey();
@@ -1510,7 +1510,7 @@ mod tests {
 
         let signers: Vec<&dyn Signer> = vec![&keypair, &presigner];
 
-        let res = tx.try_sign(&signers, Hash::default());
+        let res = tx.try_sign(&signers, Hash::default()).await;
         assert_eq!(res, Ok(()));
         assert_eq!(tx.signatures[0], keypair.sign_message(&tx.message_data()));
         assert_eq!(tx.signatures[1], presigner_sig);
@@ -1528,7 +1528,7 @@ mod tests {
         let message = Message::new(&[ix], Some(&another_pubkey));
         let mut tx = Transaction::new_unsigned(message);
 
-        let res = tx.try_sign(&signers, Hash::default());
+        let res = tx.try_sign(&signers, Hash::default()).await;
         assert!(res.is_err());
         assert_eq!(
             tx.signatures,
@@ -1536,7 +1536,7 @@ mod tests {
         );
     }
 
-    fn nonced_transfer_tx() -> (Pubkey, Pubkey, Transaction) {
+    async fn nonced_transfer_tx() -> (Pubkey, Pubkey, Transaction) {
         let from_keypair = Keypair::new();
         let from_pubkey = from_keypair.pubkey();
         let nonce_keypair = Keypair::new();
@@ -1546,13 +1546,13 @@ mod tests {
             system_instruction::transfer(&from_pubkey, &nonce_pubkey, 42),
         ];
         let message = Message::new(&instructions, Some(&nonce_pubkey));
-        let tx = Transaction::new(&[&from_keypair, &nonce_keypair], message, Hash::default());
+        let tx = Transaction::new(&[&from_keypair, &nonce_keypair], message, Hash::default()).await;
         (from_pubkey, nonce_pubkey, tx)
     }
 
-    #[test]
-    fn tx_uses_nonce_ok() {
-        let (_, _, tx) = nonced_transfer_tx();
+    #[tokio::test]
+    async fn tx_uses_nonce_ok() {
+        let (_, _, tx) = nonced_transfer_tx().await;
         assert!(uses_durable_nonce(&tx).is_some());
     }
 
@@ -1561,15 +1561,15 @@ mod tests {
         assert!(uses_durable_nonce(&Transaction::default()).is_none());
     }
 
-    #[test]
-    fn tx_uses_nonce_bad_prog_id_idx_fail() {
-        let (_, _, mut tx) = nonced_transfer_tx();
+    #[tokio::test]
+    async fn tx_uses_nonce_bad_prog_id_idx_fail() {
+        let (_, _, mut tx) = nonced_transfer_tx().await;
         tx.message.instructions.get_mut(0).unwrap().program_id_index = 255u8;
         assert!(uses_durable_nonce(&tx).is_none());
     }
 
-    #[test]
-    fn tx_uses_nonce_first_prog_id_not_nonce_fail() {
+    #[tokio::test]
+    async fn tx_uses_nonce_first_prog_id_not_nonce_fail() {
         let from_keypair = Keypair::new();
         let from_pubkey = from_keypair.pubkey();
         let nonce_keypair = Keypair::new();
@@ -1579,12 +1579,12 @@ mod tests {
             system_instruction::advance_nonce_account(&nonce_pubkey, &nonce_pubkey),
         ];
         let message = Message::new(&instructions, Some(&from_pubkey));
-        let tx = Transaction::new(&[&from_keypair, &nonce_keypair], message, Hash::default());
+        let tx = Transaction::new(&[&from_keypair, &nonce_keypair], message, Hash::default()).await;
         assert!(uses_durable_nonce(&tx).is_none());
     }
 
-    #[test]
-    fn tx_uses_ro_nonce_account() {
+    #[tokio::test]
+  async  fn tx_uses_ro_nonce_account() {
         let from_keypair = Keypair::new();
         let from_pubkey = from_keypair.pubkey();
         let nonce_keypair = Keypair::new();
@@ -1605,12 +1605,12 @@ mod tests {
             Some(&from_pubkey),
             &[&from_keypair, &nonce_keypair],
             Hash::default(),
-        );
+        ).await;
         assert!(uses_durable_nonce(&tx).is_none());
     }
 
-    #[test]
-    fn tx_uses_nonce_wrong_first_nonce_ix_fail() {
+    #[tokio::test]
+async    fn tx_uses_nonce_wrong_first_nonce_ix_fail() {
         let from_keypair = Keypair::new();
         let from_pubkey = from_keypair.pubkey();
         let nonce_keypair = Keypair::new();
@@ -1625,13 +1625,13 @@ mod tests {
             system_instruction::transfer(&from_pubkey, &nonce_pubkey, 42),
         ];
         let message = Message::new(&instructions, Some(&nonce_pubkey));
-        let tx = Transaction::new(&[&from_keypair, &nonce_keypair], message, Hash::default());
+        let tx = Transaction::new(&[&from_keypair, &nonce_keypair], message, Hash::default()).await;
         assert!(uses_durable_nonce(&tx).is_none());
     }
 
-    #[test]
-    fn get_nonce_pub_from_ix_ok() {
-        let (_, nonce_pubkey, tx) = nonced_transfer_tx();
+    #[tokio::test]
+async    fn get_nonce_pub_from_ix_ok() {
+        let (_, nonce_pubkey, tx) = nonced_transfer_tx().await;
         let nonce_ix = uses_durable_nonce(&tx).unwrap();
         assert_eq!(
             get_nonce_pubkey_from_instruction(nonce_ix, &tx),
@@ -1639,26 +1639,26 @@ mod tests {
         );
     }
 
-    #[test]
-    fn get_nonce_pub_from_ix_no_accounts_fail() {
-        let (_, _, tx) = nonced_transfer_tx();
+    #[tokio::test]
+async    fn get_nonce_pub_from_ix_no_accounts_fail() {
+        let (_, _, tx) = nonced_transfer_tx().await;
         let nonce_ix = uses_durable_nonce(&tx).unwrap();
         let mut nonce_ix = nonce_ix.clone();
         nonce_ix.accounts.clear();
         assert_eq!(get_nonce_pubkey_from_instruction(&nonce_ix, &tx), None,);
     }
 
-    #[test]
-    fn get_nonce_pub_from_ix_bad_acc_idx_fail() {
-        let (_, _, tx) = nonced_transfer_tx();
+    #[tokio::test]
+async    fn get_nonce_pub_from_ix_bad_acc_idx_fail() {
+        let (_, _, tx) = nonced_transfer_tx().await;
         let nonce_ix = uses_durable_nonce(&tx).unwrap();
         let mut nonce_ix = nonce_ix.clone();
         nonce_ix.accounts[0] = 255u8;
         assert_eq!(get_nonce_pubkey_from_instruction(&nonce_ix, &tx), None,);
     }
 
-    #[test]
-    fn tx_keypair_pubkey_mismatch() {
+    #[tokio::test]
+    async fn tx_keypair_pubkey_mismatch() {
         let from_keypair = Keypair::new();
         let from_pubkey = from_keypair.pubkey();
         let to_pubkey = Pubkey::new_unique();
@@ -1666,25 +1666,25 @@ mod tests {
         let mut tx = Transaction::new_with_payer(&instructions, Some(&from_pubkey));
         let unused_keypair = Keypair::new();
         let err = tx
-            .try_partial_sign(&[&from_keypair, &unused_keypair], Hash::default())
+            .try_partial_sign(&[&from_keypair, &unused_keypair], Hash::default()).await
             .unwrap_err();
         assert_eq!(err, SignerError::KeypairPubkeyMismatch);
     }
 
-    #[test]
-    fn test_unsized_signers() {
-        fn instructions_to_tx(
+    #[tokio::test]
+async    fn test_unsized_signers() {
+       async fn instructions_to_tx(
             instructions: &[Instruction],
-            signers: Box<dyn Signers>,
+            signers: Box<impl Signers>,
         ) -> Transaction {
             let pubkeys = signers.pubkeys();
             let first_signer = pubkeys.first().expect("should exist");
             let message = Message::new(instructions, Some(first_signer));
-            Transaction::new(signers.as_ref(), message, Hash::default())
+            Transaction::new(signers.as_ref(), message, Hash::default()).await
         }
 
         let signer: Box<dyn Signer> = Box::new(Keypair::new());
-        let tx = instructions_to_tx(&[], Box::new(vec![signer]));
+        let tx = instructions_to_tx(&[], Box::new(vec![signer])).await;
 
         assert!(tx.is_signed());
     }

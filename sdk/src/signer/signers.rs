@@ -12,8 +12,8 @@ use {
 pub trait Signers {
     fn pubkeys(&self) -> Vec<Pubkey>;
     fn try_pubkeys(&self) -> Result<Vec<Pubkey>, SignerError>;
-    fn sign_message(&self, message: &[u8]) -> Vec<Signature>;
-    fn try_sign_message(&self, message: &[u8]) -> Result<Vec<Signature>, SignerError>;
+    async fn sign_message(&self, message: &[u8]) -> Vec<Signature>;
+    async fn try_sign_message(&self, message: &[u8]) -> Result<Vec<Signature>, SignerError>;
     fn is_interactive(&self) -> bool;
 }
 
@@ -31,13 +31,13 @@ macro_rules! default_keypairs_impl {
             Ok(pubkeys)
         }
 
-        fn sign_message(&self, message: &[u8]) -> Vec<Signature> {
+        async fn sign_message(&self, message: &[u8]) -> Vec<Signature> {
             self.iter()
                 .map(|keypair| keypair.sign_message(message))
                 .collect()
         }
 
-        fn try_sign_message(&self, message: &[u8]) -> Result<Vec<Signature>, SignerError> {
+        async fn try_sign_message(&self, message: &[u8]) -> Result<Vec<Signature>, SignerError> {
             let mut signatures = Vec::new();
             for keypair in self.iter() {
                 signatures.push(keypair.try_sign_message(message)?);
@@ -173,36 +173,36 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_dyn_keypairs_compile() {
+    #[tokio::test]
+    async fn test_dyn_keypairs_compile() {
         let xs: Vec<Box<dyn Signer>> = vec![Box::new(Foo {}), Box::new(Bar {})];
         assert_eq!(
-            xs.sign_message(b""),
+            xs.sign_message(b"").await,
             vec![Signature::default(), Signature::default()],
         );
 
         // Same as above, but less compiler magic.
         let xs_ref: &[Box<dyn Signer>] = &xs;
         assert_eq!(
-            Signers::sign_message(xs_ref, b""),
+            Signers::sign_message(xs_ref, b"").await,
             vec![Signature::default(), Signature::default()],
         );
     }
 
-    #[test]
-    fn test_dyn_keypairs_by_ref_compile() {
+    #[tokio::test]
+    async fn test_dyn_keypairs_by_ref_compile() {
         let foo = Foo {};
         let bar = Bar {};
         let xs: Vec<&dyn Signer> = vec![&foo, &bar];
         assert_eq!(
-            xs.sign_message(b""),
+            xs.sign_message(b"").await,
             vec![Signature::default(), Signature::default()],
         );
 
         // Same as above, but less compiler magic.
         let xs_ref: &[&dyn Signer] = &xs;
         assert_eq!(
-            Signers::sign_message(xs_ref, b""),
+            Signers::sign_message(xs_ref, b"").await,
             vec![Signature::default(), Signature::default()],
         );
     }

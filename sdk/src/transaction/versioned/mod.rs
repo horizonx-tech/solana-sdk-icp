@@ -68,7 +68,7 @@ impl From<Transaction> for VersionedTransaction {
 impl VersionedTransaction {
     /// Signs a versioned message and if successful, returns a signed
     /// transaction.
-    pub fn try_new<T: Signers + ?Sized>(
+    pub async fn try_new<T: Signers + ?Sized>(
         message: VersionedMessage,
         keypairs: &T,
     ) -> std::result::Result<Self, SignerError> {
@@ -98,7 +98,7 @@ impl VersionedTransaction {
             })
             .collect::<std::result::Result<_, SignerError>>()?;
 
-        let unordered_signatures = keypairs.try_sign_message(&message_data)?;
+        let unordered_signatures = keypairs.try_sign_message(&message_data).await?;
         let signatures: Vec<Signature> = signature_indexes
             .into_iter()
             .map(|index| {
@@ -230,8 +230,8 @@ mod tests {
         },
     };
 
-    #[test]
-    fn test_try_new() {
+    #[tokio::test]
+    async fn test_try_new() {
         let keypair0 = Keypair::new();
         let keypair1 = Keypair::new();
         let keypair2 = Keypair::new();
@@ -249,32 +249,32 @@ mod tests {
         ));
 
         assert_eq!(
-            VersionedTransaction::try_new(message.clone(), &[&keypair0]),
+            VersionedTransaction::try_new(message.clone(), &[&keypair0]).await,
             Err(SignerError::NotEnoughSigners)
         );
 
         assert_eq!(
-            VersionedTransaction::try_new(message.clone(), &[&keypair0, &keypair0]),
+            VersionedTransaction::try_new(message.clone(), &[&keypair0, &keypair0]).await,
             Err(SignerError::KeypairPubkeyMismatch)
         );
 
         assert_eq!(
-            VersionedTransaction::try_new(message.clone(), &[&keypair1, &keypair2]),
+            VersionedTransaction::try_new(message.clone(), &[&keypair1, &keypair2]).await,
             Err(SignerError::KeypairPubkeyMismatch)
         );
 
-        match VersionedTransaction::try_new(message.clone(), &[&keypair0, &keypair1]) {
+        match VersionedTransaction::try_new(message.clone(), &[&keypair0, &keypair1]).await {
             Ok(tx) => assert_eq!(tx.verify_with_results(), vec![true; 2]),
             Err(err) => assert_eq!(Some(err), None),
         }
 
-        match VersionedTransaction::try_new(message, &[&keypair1, &keypair0]) {
+        match VersionedTransaction::try_new(message, &[&keypair1, &keypair0]).await {
             Ok(tx) => assert_eq!(tx.verify_with_results(), vec![true; 2]),
             Err(err) => assert_eq!(Some(err), None),
         }
     }
 
-    fn nonced_transfer_tx() -> (Pubkey, Pubkey, VersionedTransaction) {
+    async fn nonced_transfer_tx() -> (Pubkey, Pubkey, VersionedTransaction) {
         let from_keypair = Keypair::new();
         let from_pubkey = from_keypair.pubkey();
         let nonce_keypair = Keypair::new();
@@ -284,13 +284,13 @@ mod tests {
             system_instruction::transfer(&from_pubkey, &nonce_pubkey, 42),
         ];
         let message = LegacyMessage::new(&instructions, Some(&nonce_pubkey));
-        let tx = Transaction::new(&[&from_keypair, &nonce_keypair], message, Hash::default());
+        let tx = Transaction::new(&[&from_keypair, &nonce_keypair], message, Hash::default()).await;
         (from_pubkey, nonce_pubkey, tx.into())
     }
 
-    #[test]
-    fn tx_uses_nonce_ok() {
-        let (_, _, tx) = nonced_transfer_tx();
+    #[tokio::test]
+async    fn tx_uses_nonce_ok() {
+        let (_, _, tx) = nonced_transfer_tx().await;
         assert!(tx.uses_durable_nonce());
     }
 
@@ -299,9 +299,9 @@ mod tests {
         assert!(!VersionedTransaction::default().uses_durable_nonce());
     }
 
-    #[test]
-    fn tx_uses_nonce_bad_prog_id_idx_fail() {
-        let (_, _, mut tx) = nonced_transfer_tx();
+    #[tokio::test]
+async    fn tx_uses_nonce_bad_prog_id_idx_fail() {
+        let (_, _, mut tx) = nonced_transfer_tx().await;
         match &mut tx.message {
             VersionedMessage::Legacy(message) => {
                 message.instructions.get_mut(0).unwrap().program_id_index = 255u8;
@@ -311,8 +311,8 @@ mod tests {
         assert!(!tx.uses_durable_nonce());
     }
 
-    #[test]
-    fn tx_uses_nonce_first_prog_id_not_nonce_fail() {
+    #[tokio::test]
+async    fn tx_uses_nonce_first_prog_id_not_nonce_fail() {
         let from_keypair = Keypair::new();
         let from_pubkey = from_keypair.pubkey();
         let nonce_keypair = Keypair::new();
@@ -322,13 +322,13 @@ mod tests {
             system_instruction::advance_nonce_account(&nonce_pubkey, &nonce_pubkey),
         ];
         let message = LegacyMessage::new(&instructions, Some(&from_pubkey));
-        let tx = Transaction::new(&[&from_keypair, &nonce_keypair], message, Hash::default());
+        let tx = Transaction::new(&[&from_keypair, &nonce_keypair], message, Hash::default()).await;
         let tx = VersionedTransaction::from(tx);
         assert!(!tx.uses_durable_nonce());
     }
 
-    #[test]
-    fn tx_uses_ro_nonce_account() {
+    #[tokio::test]
+async    fn tx_uses_ro_nonce_account() {
         let from_keypair = Keypair::new();
         let from_pubkey = from_keypair.pubkey();
         let nonce_keypair = Keypair::new();
@@ -349,13 +349,13 @@ mod tests {
             Some(&from_pubkey),
             &[&from_keypair, &nonce_keypair],
             Hash::default(),
-        );
+        ).await;
         let tx = VersionedTransaction::from(tx);
         assert!(!tx.uses_durable_nonce());
     }
 
-    #[test]
-    fn tx_uses_nonce_wrong_first_nonce_ix_fail() {
+    #[tokio::test]
+async    fn tx_uses_nonce_wrong_first_nonce_ix_fail() {
         let from_keypair = Keypair::new();
         let from_pubkey = from_keypair.pubkey();
         let nonce_keypair = Keypair::new();
@@ -370,7 +370,7 @@ mod tests {
             system_instruction::transfer(&from_pubkey, &nonce_pubkey, 42),
         ];
         let message = LegacyMessage::new(&instructions, Some(&nonce_pubkey));
-        let tx = Transaction::new(&[&from_keypair, &nonce_keypair], message, Hash::default());
+        let tx = Transaction::new(&[&from_keypair, &nonce_keypair], message, Hash::default()).await;
         let tx = VersionedTransaction::from(tx);
         assert!(!tx.uses_durable_nonce());
     }

@@ -3606,6 +3606,7 @@ dependencies = [
  "static_assertions",
  "thiserror",
  "tiny-bip39",
+ "tokio",
  "uriparse",
  "wasm-bindgen",
 ]

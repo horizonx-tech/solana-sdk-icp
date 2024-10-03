@@ -11,7 +11,7 @@ use crate::{
 };
 
 /// Create and sign new SystemInstruction::CreateAccount transaction
-pub fn create_account(
+pub async fn create_account(
     from_keypair: &Keypair,
     to_keypair: &Keypair,
     recent_blockhash: Hash,
@@ -24,11 +24,11 @@ pub fn create_account(
     let instruction =
         system_instruction::create_account(&from_pubkey, &to_pubkey, lamports, space, program_id);
     let message = Message::new(&[instruction], Some(&from_pubkey));
-    Transaction::new(&[from_keypair, to_keypair], message, recent_blockhash)
+    Transaction::new(&[from_keypair, to_keypair], message, recent_blockhash).await
 }
 
 /// Create and sign new SystemInstruction::Allocate transaction
-pub fn allocate(
+pub async fn allocate(
     payer_keypair: &Keypair,
     account_keypair: &Keypair,
     recent_blockhash: Hash,
@@ -38,19 +38,19 @@ pub fn allocate(
     let account_pubkey = account_keypair.pubkey();
     let instruction = system_instruction::allocate(&account_pubkey, space);
     let message = Message::new(&[instruction], Some(&payer_pubkey));
-    Transaction::new(&[payer_keypair, account_keypair], message, recent_blockhash)
+    Transaction::new(&[payer_keypair, account_keypair], message, recent_blockhash).await
 }
 
 /// Create and sign new system_instruction::Assign transaction
-pub fn assign(from_keypair: &Keypair, recent_blockhash: Hash, program_id: &Pubkey) -> Transaction {
+pub async fn assign(from_keypair: &Keypair, recent_blockhash: Hash, program_id: &Pubkey) -> Transaction {
     let from_pubkey = from_keypair.pubkey();
     let instruction = system_instruction::assign(&from_pubkey, program_id);
     let message = Message::new(&[instruction], Some(&from_pubkey));
-    Transaction::new(&[from_keypair], message, recent_blockhash)
+    Transaction::new(&[from_keypair], message, recent_blockhash).await
 }
 
 /// Create and sign new system_instruction::Transfer transaction
-pub fn transfer(
+pub async fn transfer(
     from_keypair: &Keypair,
     to: &Pubkey,
     lamports: u64,
@@ -59,11 +59,11 @@ pub fn transfer(
     let from_pubkey = from_keypair.pubkey();
     let instruction = system_instruction::transfer(&from_pubkey, to, lamports);
     let message = Message::new(&[instruction], Some(&from_pubkey));
-    Transaction::new(&[from_keypair], message, recent_blockhash)
+    Transaction::new(&[from_keypair], message, recent_blockhash).await
 }
 
 /// Create and sign new nonced system_instruction::Transfer transaction
-pub fn nonced_transfer(
+pub async fn nonced_transfer(
     from_keypair: &Keypair,
     to: &Pubkey,
     lamports: u64,
@@ -79,5 +79,5 @@ pub fn nonced_transfer(
         nonce_account,
         &nonce_authority.pubkey(),
     );
-    Transaction::new(&[from_keypair, nonce_authority], message, nonce_hash)
+    Transaction::new(&[from_keypair, nonce_authority], message, nonce_hash).await
 }
