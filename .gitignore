@@ -9,7 +9,7 @@ target/
 **/*.rs.bk
 .cargo
 
-/config/
+
 
 .cache
 

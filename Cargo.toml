@@ -7,6 +7,19 @@ split-debuginfo = "packed"
 members = [
     "client",
     "sdk",
+    "rpc-client",
+    "rpc-client-api",
+    "transaction-status",
+    "account-decoder",
+    "connection-cache",
+    "pubsub-client",
+    "quic-client",
+    "streamer",
+    "perf",
+    "udp-client",
+    "thin-client",
+    "config",
+    "program-runtime",
 ]
 
 # This prevents a Travis CI error when building for Windows.
@@ -242,6 +255,33 @@ zstd = "0.11.2"
 solana-sdk = { path = "sdk" }
 candid = "0.10.10"
 ic-cdk = "0.16.0"
+solana-version = "=1.18.23"
+solana-vote-program = "=1.18.23"
+solana-frozen-abi = "=1.18.23"
+solana-frozen-abi-macro = "=1.18.23"
+solana-logger = "=1.18.23"
+solana-program = "=1.18.23"
+solana-sdk-macro = "=1.18.23"
+solana-measure = "=1.18.23"
+solana-metrics = "=1.18.23"
+solana-rpc-client-nonce-utils = "=1.18.23"
+solana-net-utils = "=1.18.23"
+solana-rayon-threadlimit = "=1.18.23"
+
+solana-transaction-status = { path = "transaction-status" }
+solana-account-decoder = { path = "account-decoder" }
+solana-rpc-client = { path = "rpc-client" }
+solana-rpc-client-api = { path = "rpc-client-api" }
+solana-tpu-client = { path = "tpu-client" }
+solana-connection-cache = { path = "connection-cache" }
+solana-pubsub-client = { path = "pubsub-client" }
+solana-quic-client = { path = "quic-client" }
+solana-streamer = { path = "streamer" }
+solana-perf = { path = "perf" }
+solana-udp-client = { path = "udp-client" }
+solana-thin-client = { path = "thin-client" }
+solana-config-program = { path = "config" }
+solana-program-runtime = { path = "program-runtime" }
 
 [patch.crates-io]
 # for details, see https://github.com/anza-xyz/crossbeam/commit/fd279d707025f0e60951e429bf778b4813d1b6bf
