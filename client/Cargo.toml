@@ -1,5 +1,5 @@
 [package]
-name = "solana-client"
+name = "solana-client-icp"
 description = "Solana Client"
 documentation = "https://docs.rs/solana-client"
 version = { workspace = true }

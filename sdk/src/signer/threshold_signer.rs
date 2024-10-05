@@ -59,7 +59,7 @@ impl ThresholdSigner {
 }
 
 #[derive(CandidType, Serialize, Deserialize, Debug, Copy, Clone)]
-enum SchnorrKeyIds {
+pub enum SchnorrKeyIds {
     #[allow(unused)]
     TestKeyLocalDevelopment,
     #[allow(unused)]
