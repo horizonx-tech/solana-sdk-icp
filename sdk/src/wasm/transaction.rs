@@ -10,19 +10,11 @@ use {
     wasm_bindgen::prelude::*,
 };
 
-#[wasm_bindgen]
 impl Transaction {
     /// Create a new `Transaction`
-    #[wasm_bindgen(constructor)]
     pub fn constructor(instructions: Instructions, payer: Option<Pubkey>) -> Transaction {
         let instructions: Vec<_> = instructions.into();
         Transaction::new_with_payer(&instructions, payer.as_ref())
-    }
-
-    /// Return a message containing all data that should be signed.
-    #[wasm_bindgen(js_name = message)]
-    pub fn js_message(&self) -> Message {
-        self.message.clone()
     }
 
     /// Return the serialized message data to sign.
@@ -30,14 +22,8 @@ impl Transaction {
         self.message_data().into()
     }
 
-    /// Verify the transaction
-    #[wasm_bindgen(js_name = verify)]
-    pub fn js_verify(&self) -> Result<(), JsValue> {
-        self.verify().map_err(display_to_jsvalue)
-    }
-
-    pub fn partialSign(&mut self, keypair: &Keypair, recent_blockhash: &Hash) {
-        self.partial_sign(&[keypair], *recent_blockhash);
+    pub async fn partialSign(&mut self, keypair: &Keypair, recent_blockhash: &Hash) {
+        self.partial_sign(&[keypair], *recent_blockhash).await;
     }
 
     pub fn isSigned(&self) -> bool {
