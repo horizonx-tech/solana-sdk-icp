@@ -23,7 +23,7 @@ use {
 /// A vanilla Ed25519 key pair
 #[wasm_bindgen]
 #[derive(Debug)]
-pub struct Keypair(ed25519_dalek::Keypair);
+pub struct Keypair(ed25519_dalek::SigningKey);
 
 impl Keypair {
     /// Can be used for generating a Keypair without a dependency on `rand` types
@@ -34,7 +34,8 @@ impl Keypair {
     where
         R: CryptoRng + RngCore,
     {
-        Self(ed25519_dalek::Keypair::generate(csprng))
+        //Self(ed25519_dalek::Keypair::generate(csprng))
+        unimplemented!()
     }
 
     /// Constructs a new, random `Keypair` using `OsRng`
@@ -45,26 +46,28 @@ impl Keypair {
 
     /// Recovers a `Keypair` from a byte array
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, ed25519_dalek::SignatureError> {
-        if bytes.len() < ed25519_dalek::KEYPAIR_LENGTH {
-            return Err(ed25519_dalek::SignatureError::from_source(String::from(
-                "candidate keypair byte array is too short",
-            )));
-        }
-        let secret =
-            ed25519_dalek::SecretKey::from_bytes(&bytes[..ed25519_dalek::SECRET_KEY_LENGTH])?;
-        let public =
-            ed25519_dalek::PublicKey::from_bytes(&bytes[ed25519_dalek::SECRET_KEY_LENGTH..])?;
-        let expected_public = ed25519_dalek::PublicKey::from(&secret);
-        (public == expected_public)
-            .then_some(Self(ed25519_dalek::Keypair { secret, public }))
-            .ok_or(ed25519_dalek::SignatureError::from_source(String::from(
-                "keypair bytes do not specify same pubkey as derived from their secret key",
-            )))
+        //if bytes.len() < ed25519_dalek::KEYPAIR_LENGTH {
+        //    return Err(ed25519_dalek::SignatureError::from_source(String::from(
+        //        "candidate keypair byte array is too short",
+        //    )));
+        //}
+        //let secret =
+        //    ed25519_dalek::SecretKey::from_bytes(&bytes[..ed25519_dalek::SECRET_KEY_LENGTH])?;
+        //let public =
+        //    ed25519_dalek::PublicKey::from_bytes(&bytes[ed25519_dalek::SECRET_KEY_LENGTH..])?;
+        //let expected_public = ed25519_dalek::PublicKey::from(&secret);
+        //(public == expected_public)
+        //    .then_some(Self(ed25519_dalek::Keypair { secret, public }))
+        //    .ok_or(ed25519_dalek::SignatureError::from_source(String::from(
+        //        "keypair bytes do not specify same pubkey as derived from their secret key",
+        //    )))
+        unimplemented!()
     }
 
     /// Returns this `Keypair` as a byte array
     pub fn to_bytes(&self) -> [u8; 64] {
-        self.0.to_bytes()
+        //self.0.to_bytes()
+        unimplemented!()
     }
 
     /// Recovers a `Keypair` from a base58-encoded string
@@ -79,7 +82,8 @@ impl Keypair {
 
     /// Gets this `Keypair`'s SecretKey
     pub fn secret(&self) -> &ed25519_dalek::SecretKey {
-        &self.0.secret
+        // &self.0
+        unimplemented!()
     }
 
     /// Allows Keypair cloning
@@ -90,11 +94,12 @@ impl Keypair {
     /// Only use this in tests or when strictly required. Consider using [`std::sync::Arc<Keypair>`]
     /// instead.
     pub fn insecure_clone(&self) -> Self {
-        Self(ed25519_dalek::Keypair {
-            // This will never error since self is a valid keypair
-            secret: ed25519_dalek::SecretKey::from_bytes(self.0.secret.as_bytes()).unwrap(),
-            public: self.0.public,
-        })
+        // Self(ed25519_dalek::Keypair {
+        //     // This will never error since self is a valid keypair
+        //     secret: ed25519_dalek::SecretKey::from_bytes(self.0.secret.as_bytes()).unwrap(),
+        //     public: self.0.public,
+        // })
+        unimplemented!()
     }
 }
 
@@ -104,7 +109,7 @@ static_assertions::const_assert_eq!(Keypair::SECRET_KEY_LENGTH, ed25519_dalek::S
 impl Signer for Keypair {
     #[inline]
     fn pubkey(&self) -> Pubkey {
-        Pubkey::from(self.0.public.to_bytes())
+        Pubkey::from(self.0.verifying_key().to_bytes())
     }
 
     fn try_pubkey(&self) -> Result<Pubkey, SignerError> {
@@ -206,14 +211,15 @@ pub fn write_keypair_file<F: AsRef<Path>>(
 
 /// Constructs a `Keypair` from caller-provided seed entropy
 pub fn keypair_from_seed(seed: &[u8]) -> Result<Keypair, Box<dyn error::Error>> {
-    if seed.len() < ed25519_dalek::SECRET_KEY_LENGTH {
-        return Err("Seed is too short".into());
-    }
-    let secret = ed25519_dalek::SecretKey::from_bytes(&seed[..ed25519_dalek::SECRET_KEY_LENGTH])
-        .map_err(|e| e.to_string())?;
-    let public = ed25519_dalek::PublicKey::from(&secret);
-    let dalek_keypair = ed25519_dalek::Keypair { secret, public };
-    Ok(Keypair(dalek_keypair))
+    //    if seed.len() < ed25519_dalek::SECRET_KEY_LENGTH {
+    //        return Err("Seed is too short".into());
+    //    }
+    //    let secret = ed25519_dalek::SecretKey::from_bytes(&seed[..ed25519_dalek::SECRET_KEY_LENGTH])
+    //        .map_err(|e| e.to_string())?;
+    //    let public = ed25519_dalek::PublicKey::from(&secret);
+    //    let dalek_keypair = ed25519_dalek::Keypair { secret, public };
+    //    Ok(Keypair(dalek_keypair))
+    unimplemented!()
 }
 
 /// Generates a Keypair using Bip32 Hierarchical Derivation if derivation-path is provided;
@@ -231,13 +237,14 @@ fn bip32_derived_keypair(
     seed: &[u8],
     derivation_path: DerivationPath,
 ) -> Result<Keypair, Bip32Error> {
-    let extended = ed25519_dalek_bip32::ExtendedSecretKey::from_seed(seed)
-        .and_then(|extended| extended.derive(&derivation_path))?;
-    let extended_public_key = extended.public_key();
-    Ok(Keypair(ed25519_dalek::Keypair {
-        secret: extended.secret_key,
-        public: extended_public_key,
-    }))
+    //let extended = ed25519_dalek_bip32::ExtendedSigningKey::from_seed(seed)
+    //    .and_then(|extended| extended.derive(&derivation_path))?;
+    //let extended_public_key = extended.verifying_key();
+    //Ok(Keypair(ed25519_dalek::Keypair {
+    //    secret: extended.signing_key.into(),
+    //    public: extended_public_key.into(),
+    //}))
+    unimplemented!()
 }
 
 pub fn generate_seed_from_seed_phrase_and_passphrase(

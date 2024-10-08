@@ -7,7 +7,8 @@
 use {
     crate::{feature_set::FeatureSet, instruction::Instruction, precompiles::PrecompileError},
     bytemuck::{bytes_of, Pod, Zeroable},
-    ed25519_dalek::{ed25519::signature::Signature, Signer, Verifier},
+    ed25519_dalek::{Signature, Signer, Verifier},
+    solana_program::pubkey::Pubkey,
 };
 
 pub const PUBKEY_SERIALIZED_SIZE: usize = 32;
@@ -29,9 +30,9 @@ pub struct Ed25519SignatureOffsets {
     message_instruction_index: u16,    // index of instruction data to get message data
 }
 
-pub fn new_ed25519_instruction(keypair: &ed25519_dalek::Keypair, message: &[u8]) -> Instruction {
+pub fn new_ed25519_instruction(keypair: &ed25519_dalek::SigningKey, message: &[u8]) -> Instruction {
     let signature = keypair.sign(message).to_bytes();
-    let pubkey = keypair.public.to_bytes();
+    let pubkey = keypair.verifying_key().to_bytes();
 
     assert_eq!(pubkey.len(), PUBKEY_SERIALIZED_SIZE);
     assert_eq!(signature.len(), SIGNATURE_SERIALIZED_SIZE);
@@ -120,8 +121,9 @@ pub fn verify(
             SIGNATURE_SERIALIZED_SIZE,
         )?;
 
-        let signature =
-            Signature::from_bytes(signature).map_err(|_| PrecompileError::InvalidSignature)?;
+        let signature = Signature::from_slice(signature).map_err(|_| {
+            PrecompileError::InvalidDataOffsets // Invalid signature
+        })?;
 
         // Parse out pubkey
         let pubkey = get_data_slice(
@@ -132,8 +134,11 @@ pub fn verify(
             PUBKEY_SERIALIZED_SIZE,
         )?;
 
-        let publickey = ed25519_dalek::PublicKey::from_bytes(pubkey)
-            .map_err(|_| PrecompileError::InvalidPublicKey)?;
+        let publickey =
+            ed25519_dalek::VerifyingKey::from_bytes(&Pubkey::try_from(pubkey).unwrap().to_bytes())
+                .map_err(|_| {
+                    PrecompileError::InvalidDataOffsets // Invalid public key
+                })?;
 
         // Parse out message
         let message = get_data_slice(
@@ -358,7 +363,8 @@ pub mod test {
             Some(&mint_keypair.pubkey()),
             &[&mint_keypair],
             Hash::default(),
-        ).await;
+        )
+        .await;
 
         assert!(tx.verify_precompiles(&feature_set).is_ok());
 
@@ -376,7 +382,8 @@ pub mod test {
             Some(&mint_keypair.pubkey()),
             &[&mint_keypair],
             Hash::default(),
-        ).await;
+        )
+        .await;
         assert!(tx.verify_precompiles(&feature_set).is_err());
     }
 }

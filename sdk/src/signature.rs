@@ -2,6 +2,7 @@
 #![cfg(feature = "full")]
 
 use async_trait::async_trait;
+use ed25519_dalek::PUBLIC_KEY_LENGTH;
 
 // legacy module paths
 pub use crate::signer::{keypair::*, null_signer::*, presigner::*, *};
@@ -48,7 +49,11 @@ impl Signature {
         pubkey_bytes: &[u8],
         message_bytes: &[u8],
     ) -> Result<(), ed25519_dalek::SignatureError> {
-        let publickey = ed25519_dalek::PublicKey::from_bytes(pubkey_bytes)?;
+        // convert pubkey_bytes to a [u8; 32] array
+        let pubkey = Pubkey::try_from(pubkey_bytes)
+            .map_err(|e| ed25519_dalek::SignatureError::from_source(e))?;
+
+        let publickey = ed25519_dalek::VerifyingKey::from_bytes(&pubkey.to_bytes())?;
         let signature = self.0.as_slice().try_into()?;
         publickey.verify_strict(message_bytes, &signature)
     }
