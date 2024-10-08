@@ -7,6 +7,7 @@ split-debuginfo = "packed"
 members = [
     "sdk",
     "program-runtime",
+    "sdk/program",
 ]
 
 # This prevents a Travis CI error when building for Windows.
@@ -247,7 +248,6 @@ solana-vote-program = "=1.18.23"
 solana-frozen-abi = "=1.18.23"
 solana-frozen-abi-macro = "=1.18.23"
 solana-logger = "=1.18.23"
-solana-program = "=1.18.23"
 solana-sdk-macro = "=1.18.23"
 solana-measure = "=1.18.23"
 solana-metrics = "=1.18.23"
@@ -258,6 +258,7 @@ solana-rayon-threadlimit = "=1.18.23"
 solana-connection-cache = { path = "connection-cache" }
 solana-config-program = { path = "config" }
 solana-program-runtime = { path = "program-runtime" }
+solana-program = { path = "sdk/program" }
 
 [patch.crates-io]
 # for details, see https://github.com/anza-xyz/crossbeam/commit/fd279d707025f0e60951e429bf778b4813d1b6bf
