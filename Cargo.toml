@@ -6,6 +6,7 @@ split-debuginfo = "packed"
 [workspace]
 members = [
     "sdk",
+    "program-runtime",
 ]
 
 # This prevents a Travis CI error when building for Windows.
