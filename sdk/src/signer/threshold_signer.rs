@@ -6,7 +6,7 @@ use solana_program::pubkey::Pubkey;
 
 use crate::signature::Signature;
 
-use super::{Signer, SignerError};
+use super::{signers::Signers, Signer, SignerError};
 
 #[derive(Clone, Debug)]
 pub struct ThresholdSigner {
@@ -79,6 +79,25 @@ impl SchnorrKeyIds {
             }
             .to_string(),
         }
+    }
+}
+
+impl Signers for ThresholdSigner {
+    fn pubkeys(&self) -> Vec<Pubkey> {
+        vec![self.public_key]
+    }
+    fn try_pubkeys(&self) -> Result<Vec<Pubkey>, SignerError> {
+        Ok(vec![self.public_key])
+    }
+    async fn sign_message(&self, message: &[u8]) -> Vec<Signature> {
+        vec![self.try_sign_message(message).await]
+    }
+    async fn try_sign_message(&self, message: &[u8]) -> Result<Vec<Signature>, SignerError> {
+        Ok(vec![self.try_sign_message(message).await?])
+    }
+
+    fn is_interactive(&self) -> bool {
+        false
     }
 }
 
