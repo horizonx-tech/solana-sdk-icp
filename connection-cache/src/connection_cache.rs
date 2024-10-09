@@ -7,7 +7,6 @@ use {
     crossbeam_channel::{Receiver, RecvError, Sender},
     indexmap::map::IndexMap,
     log::*,
-    rand::{thread_rng, Rng},
     solana_measure::measure::Measure,
     solana_sdk::{signature::Keypair, timing::AtomicInterval},
     std::{
@@ -514,7 +513,6 @@ mod tests {
             nonblocking::client_connection::ClientConnection as NonblockingClientConnection,
         },
         async_trait::async_trait,
-        rand::{Rng, SeedableRng},
         rand_chacha::ChaChaRng,
         solana_sdk::transport::Result as TransportResult,
         std::{

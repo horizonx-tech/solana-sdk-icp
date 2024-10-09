@@ -1,8 +1,9 @@
 //! The `system_transaction` module provides functionality for creating system transactions.
 #![cfg(feature = "full")]
 
+use solana_program::hash::Hash;
+
 use crate::{
-    hash::Hash,
     message::Message,
     pubkey::Pubkey,
     signature::{Keypair, Signer},
@@ -42,7 +43,11 @@ pub async fn allocate(
 }
 
 /// Create and sign new system_instruction::Assign transaction
-pub async fn assign(from_keypair: &Keypair, recent_blockhash: Hash, program_id: &Pubkey) -> Transaction {
+pub async fn assign(
+    from_keypair: &Keypair,
+    recent_blockhash: Hash,
+    program_id: &Pubkey,
+) -> Transaction {
     let from_pubkey = from_keypair.pubkey();
     let instruction = system_instruction::assign(&from_pubkey, program_id);
     let message = Message::new(&[instruction], Some(&from_pubkey));

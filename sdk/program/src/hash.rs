@@ -4,7 +4,7 @@
 //! [`Hash`]: struct@Hash
 
 use {
-    crate::{sanitize::Sanitize, wasm_bindgen},
+    crate::sanitize::Sanitize,
     borsh::{BorshDeserialize, BorshSchema, BorshSerialize},
     bytemuck::{Pod, Zeroable},
     sha2::{Digest, Sha256},
@@ -27,7 +27,7 @@ const MAX_BASE58_LEN: usize = 44;
 /// [blake3]: https://github.com/BLAKE3-team/BLAKE3
 /// [`blake3`]: crate::blake3
 /// [`Message::hash`]: crate::message::Message::hash
-#[wasm_bindgen]
+//#[wasm_bindgen]
 #[derive(
     Serialize,
     Deserialize,

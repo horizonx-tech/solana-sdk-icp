@@ -3,14 +3,13 @@
 #![allow(non_snake_case)]
 use {
     crate::signer::{keypair::Keypair, Signer},
-    solana_program::{pubkey::Pubkey, wasm::display_to_jsvalue},
-    wasm_bindgen::prelude::*,
+    solana_program::pubkey::Pubkey,
 };
 
-#[wasm_bindgen]
+//#[wasm_bindgen]
 impl Keypair {
     /// Create a new `Keypair `
-    #[wasm_bindgen(constructor)]
+    //  #[wasm_bindgen(constructor)]
     pub fn constructor() -> Keypair {
         Keypair::new()
     }
@@ -21,12 +20,12 @@ impl Keypair {
     }
 
     /// Recover a `Keypair` from a `Uint8Array`
-    pub fn fromBytes(bytes: &[u8]) -> Result<Keypair, JsValue> {
-        Keypair::from_bytes(bytes).map_err(display_to_jsvalue)
+    pub fn fromBytes(bytes: &[u8]) -> Result<Keypair, String> {
+        Keypair::from_bytes(bytes).map_err(|err| format!("{:?}", err))
     }
 
     /// Return the `Pubkey` for this `Keypair`
-    #[wasm_bindgen(js_name = pubkey)]
+    //#[wasm_bindgen(js_name = pubkey)]
     pub fn js_pubkey(&self) -> Pubkey {
         // `wasm_bindgen` does not support traits (`Signer) yet
         self.pubkey()

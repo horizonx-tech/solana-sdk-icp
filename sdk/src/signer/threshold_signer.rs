@@ -6,7 +6,7 @@ use solana_program::pubkey::Pubkey;
 
 use crate::signature::Signature;
 
-use super::{signers::Signers, Signer, SignerError};
+use super::{Signer, SignerError};
 
 #[derive(Clone, Debug)]
 pub struct ThresholdSigner {

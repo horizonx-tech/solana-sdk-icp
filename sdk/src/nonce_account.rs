@@ -4,12 +4,12 @@ use {
     crate::{
         account::{AccountSharedData, ReadableAccount},
         account_utils::StateMut,
-        hash::Hash,
         nonce::{
             state::{Data, Versions},
             State,
         },
     },
+    solana_program::hash::Hash,
     std::cell::RefCell,
 };
 

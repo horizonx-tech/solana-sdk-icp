@@ -15,7 +15,6 @@ use crate::{
     commitment_config::CommitmentConfig,
     epoch_info::EpochInfo,
     fee_calculator::{FeeCalculator, FeeRateGovernor},
-    hash::Hash,
     instruction::Instruction,
     message::Message,
     pubkey::Pubkey,
@@ -26,6 +25,7 @@ use crate::{
     transaction::{self, Transaction, VersionedTransaction},
     transport::Result,
 };
+use solana_program::hash::Hash;
 
 pub trait Client: SyncClient + AsyncClient {
     fn tpu_addr(&self) -> String;

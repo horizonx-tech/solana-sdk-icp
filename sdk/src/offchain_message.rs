@@ -4,12 +4,12 @@
 
 use {
     crate::{
-        hash::Hash,
         pubkey::Pubkey,
         sanitize::SanitizeError,
         signature::{Signature, Signer},
     },
     num_enum::{IntoPrimitive, TryFromPrimitive},
+    solana_program::hash::Hash,
 };
 
 #[cfg(test)]
@@ -46,11 +46,8 @@ pub enum MessageFormat {
 pub mod v0 {
     use {
         super::{is_printable_ascii, is_utf8, MessageFormat, OffchainMessage as Base},
-        crate::{
-            hash::{Hash, Hasher},
-            packet::PACKET_DATA_SIZE,
-            sanitize::SanitizeError,
-        },
+        crate::{packet::PACKET_DATA_SIZE, sanitize::SanitizeError},
+        solana_program::hash::{extend_and_hash, Hash, Hasher},
     };
 
     /// OffchainMessage Version 0.

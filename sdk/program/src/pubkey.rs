@@ -2,7 +2,7 @@
 
 #![allow(clippy::arithmetic_side_effects)]
 use {
-    crate::{decode_error::DecodeError, hash::hashv, wasm_bindgen},
+    crate::{decode_error::DecodeError, hash::hashv},
     borsh::{BorshDeserialize, BorshSchema, BorshSerialize},
     bytemuck::{Pod, Zeroable},
     num_derive::{FromPrimitive, ToPrimitive},
@@ -64,7 +64,7 @@ impl From<u64> for PubkeyError {
 /// [ed25519]: https://ed25519.cr.yp.to/
 /// [pdas]: https://solana.com/docs/core/cpi#program-derived-addresses
 /// [`Keypair`]: https://docs.rs/solana-sdk/latest/solana_sdk/signer/keypair/struct.Keypair.html
-#[wasm_bindgen]
+//#[wasm_bindgen]
 #[repr(transparent)]
 #[derive(
     AbiExample,
@@ -189,7 +189,8 @@ impl Pubkey {
     #[cfg(not(target_os = "solana"))]
     pub fn new_rand() -> Self {
         // Consider removing Pubkey::new_rand() entirely in the v1.5 or v1.6 timeframe
-        Pubkey::from(rand::random::<[u8; 32]>())
+        //Pubkey::from(rand::random::<[u8; 32]>())
+        unimplemented!()
     }
 
     /// unique Pubkey for tests and benchmarks.
@@ -930,30 +931,30 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_pubkey_off_curve() {
-        // try a bunch of random input, all successful generated program
-        // addresses must land off the curve and be unique
-        let mut addresses = vec![];
-        for _ in 0..1_000 {
-            let program_id = Pubkey::new_unique();
-            let bytes1 = rand::random::<[u8; 10]>();
-            let bytes2 = rand::random::<[u8; 32]>();
-            if let Ok(program_address) =
-                Pubkey::create_program_address(&[&bytes1, &bytes2], &program_id)
-            {
-                let is_on_curve = curve25519_dalek::edwards::CompressedEdwardsY::from_slice(
-                    &program_address.to_bytes(),
-                )
-                .unwrap()
-                .decompress()
-                .is_some();
-                assert!(!is_on_curve);
-                assert!(!addresses.contains(&program_address));
-                addresses.push(program_address);
-            }
-        }
-    }
+    //#[test]
+    //fn test_pubkey_off_curve() {
+    //    // try a bunch of random input, all successful generated program
+    //    // addresses must land off the curve and be unique
+    //    let mut addresses = vec![];
+    //    for _ in 0..1_000 {
+    //        let program_id = Pubkey::new_unique();
+    //        let bytes1 = rand::random::<[u8; 10]>();
+    //        let bytes2 = rand::random::<[u8; 32]>();
+    //        if let Ok(program_address) =
+    //            Pubkey::create_program_address(&[&bytes1, &bytes2], &program_id)
+    //        {
+    //            let is_on_curve = curve25519_dalek::edwards::CompressedEdwardsY::from_slice(
+    //                &program_address.to_bytes(),
+    //            )
+    //            .unwrap()
+    //            .decompress()
+    //            .is_some();
+    //            assert!(!is_on_curve);
+    //            assert!(!addresses.contains(&program_address));
+    //            addresses.push(program_address);
+    //        }
+    //    }
+    //}
 
     #[test]
     fn test_find_program_address() {

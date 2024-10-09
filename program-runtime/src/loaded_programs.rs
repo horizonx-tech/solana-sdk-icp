@@ -5,7 +5,6 @@ use {
     },
     log::{debug, error, log_enabled, trace},
     percentage::PercentageInteger,
-    rand::{thread_rng, Rng},
     solana_measure::measure::Measure,
     solana_rbpf::{
         elf::Executable,
@@ -1764,7 +1763,6 @@ mod tests {
 
     #[test]
     fn test_fuzz_assign_program_order() {
-        use rand::prelude::SliceRandom;
         const EXPECTED_ENTRIES: [(u64, u64); 7] =
             [(1, 2), (5, 5), (5, 6), (5, 10), (9, 10), (10, 10), (3, 12)];
         let mut rng = rand::thread_rng();

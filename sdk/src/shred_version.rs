@@ -4,10 +4,8 @@
 
 #![cfg(feature = "full")]
 
-use solana_sdk::{
-    hard_forks::HardForks,
-    hash::{extend_and_hash, Hash},
-};
+use solana_program::hash::{extend_and_hash, Hash};
+use solana_sdk::hard_forks::HardForks;
 
 pub fn version_from_hash(hash: &Hash) -> u16 {
     let hash = hash.as_ref();

@@ -4,7 +4,6 @@
 
 use {
     crate::{
-        hash::Hash,
         message::VersionedMessage,
         sanitize::SanitizeError,
         short_vec,
@@ -20,6 +19,7 @@ use {
 mod sanitized;
 
 pub use sanitized::*;
+use solana_program::hash::Hash;
 use {
     crate::program_utils::limited_deserialize,
     solana_program::{

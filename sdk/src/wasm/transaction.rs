@@ -2,12 +2,8 @@
 #![cfg(target_arch = "wasm32")]
 #![allow(non_snake_case)]
 use {
-    crate::{hash::Hash, message::Message, signer::keypair::Keypair, transaction::Transaction},
-    solana_program::{
-        pubkey::Pubkey,
-        wasm::{display_to_jsvalue, instructions::Instructions},
-    },
-    wasm_bindgen::prelude::*,
+    crate::{message::Message, signer::keypair::Keypair, transaction::Transaction},
+    solana_program::{hash::Hash, pubkey::Pubkey, wasm::instructions::Instructions},
 };
 
 impl Transaction {
@@ -34,7 +30,7 @@ impl Transaction {
         bincode::serialize(self).unwrap().into()
     }
 
-    pub fn fromBytes(bytes: &[u8]) -> Result<Transaction, JsValue> {
-        bincode::deserialize(bytes).map_err(display_to_jsvalue)
+    pub fn fromBytes(bytes: &[u8]) -> Result<Transaction, String> {
+        bincode::deserialize(bytes).map_err(|err| format!("{:?}", err))
     }
 }

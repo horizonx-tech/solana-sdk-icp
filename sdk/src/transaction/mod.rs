@@ -114,7 +114,6 @@
 
 use {
     crate::{
-        hash::Hash,
         instruction::{CompiledInstruction, Instruction},
         message::Message,
         nonce::NONCED_TX_MARKER_IX_INDEX,
@@ -125,10 +124,10 @@ use {
         short_vec,
         signature::{Signature, SignerError},
         signers::Signers,
-        wasm_bindgen,
+        //        wasm_bindgen,
     },
     serde::Serialize,
-    solana_program::{system_instruction::SystemInstruction, system_program},
+    solana_program::{hash::Hash, system_instruction::SystemInstruction, system_program},
     solana_sdk::feature_set,
     std::result,
 };
@@ -168,7 +167,7 @@ pub type Result<T> = result::Result<T, TransactionError>;
 /// if the caller has knowledge that the first account of the constructed
 /// transaction's `Message` is both a signer and the expected fee-payer, then
 /// redundantly specifying the fee-payer is not strictly required.
-#[wasm_bindgen]
+//#[wasm_bindgen]
 #[frozen_abi(digest = "FZtncnS1Xk8ghHfKiXE5oGiUbw2wJhmfXQuNgQR3K6Mc")]
 #[derive(Debug, PartialEq, Default, Eq, Clone, Serialize, Deserialize, AbiExample)]
 pub struct Transaction {
@@ -181,12 +180,12 @@ pub struct Transaction {
     /// [`MessageHeader`]: crate::message::MessageHeader
     /// [`num_required_signatures`]: crate::message::MessageHeader::num_required_signatures
     // NOTE: Serialization-related changes must be paired with the direct read at sigverify.
-    #[wasm_bindgen(skip)]
+    //   #[wasm_bindgen(skip)]
     #[serde(with = "short_vec")]
     pub signatures: Vec<Signature>,
 
     /// The message to sign.
-    #[wasm_bindgen(skip)]
+    //    #[wasm_bindgen(skip)]
     pub message: Message,
 }
 

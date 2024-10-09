@@ -25,13 +25,11 @@ full = [
     "chrono",
     "generic-array",
     "memmap2",
-    "rand",
-    "rand0-7",
     "serde_json",
     "ed25519-dalek",
     "ed25519-dalek-bip32",
     "solana-logger",
-    "libsecp256k1",
+#    "libsecp256k1",
     "sha3",
     "digest",
 ]
@@ -56,7 +54,7 @@ generic-array = { workspace = true, features = ["serde", "more_lengths"], option
 hmac = { workspace = true }
 itertools =  { workspace = true }
 lazy_static = { workspace = true }
-libsecp256k1 = { workspace = true, optional = true }
+#libsecp256k1 = { workspace = true, optional = true }
 log = { workspace = true }
 memmap2 = { workspace = true, optional = true }
 num-derive = { workspace = true }
@@ -65,8 +63,8 @@ num_enum = { workspace = true }
 pbkdf2 = { workspace = true }
 qstring = { workspace = true }
 qualifier_attr = { workspace = true }
-rand = { workspace = true, optional = true }
-rand0-7 = { package = "rand", version = "0.7", optional = true }
+#rand = { workspace = true, optional = true }
+#rand0-7 = { package = "rand", version = "0.7", optional = true }
 rustversion = { workspace = true }
 serde = { workspace = true }
 serde_bytes = { workspace = true }
@@ -83,7 +81,7 @@ solana-program.workspace = true
 solana-sdk-macro.workspace = true
 thiserror = { workspace = true }
 uriparse = { workspace = true }
-wasm-bindgen = { workspace = true }
+#wasm-bindgen = { workspace = true }
 tokio.workspace = true
 candid.workspace = true
 ic-cdk.workspace = true
@@ -91,7 +89,7 @@ anyhow.workspace = true
 async-trait.workspace = true
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-js-sys = { workspace = true }
+#js-sys = { workspace = true }
 
 [dev-dependencies]
 anyhow = { workspace = true }
@@ -99,7 +97,7 @@ curve25519-dalek = { workspace = true }
 hex = { workspace = true }
 solana-sdk = { path = ".", features = ["dev-context-only-utils"] }
 static_assertions = { workspace = true }
-tiny-bip39 = { workspace = true }
+#tiny-bip39 = { workspace = true }
 tokio-test = "0.4.4"
 tokio = { workspace = true , features = ["full"] }
 

@@ -403,20 +403,20 @@ impl<
     }
 }
 
-#[cfg(not(target_os = "solana"))]
-impl<
-        T: Clone + std::cmp::Eq + std::hash::Hash + AbiExample,
-        S: Clone + AbiExample,
-        H: std::hash::BuildHasher + Default,
-    > AbiExample for im::HashMap<T, S, H>
-{
-    fn example() -> Self {
-        info!("AbiExample for (HashMap<T, S, H>): {}", type_name::<Self>());
-        let mut map = im::HashMap::default();
-        map.insert(T::example(), S::example());
-        map
-    }
-}
+//#[cfg(not(target_os = "solana"))]
+//impl<
+//        T: Clone + std::cmp::Eq + std::hash::Hash + AbiExample,
+//        S: Clone + AbiExample,
+//        H: std::hash::BuildHasher + Default,
+//    > AbiExample for im::HashMap<T, S, H>
+//{
+//    fn example() -> Self {
+//        info!("AbiExample for (HashMap<T, S, H>): {}", type_name::<Self>());
+//        let mut map = im::HashMap::default();
+//        map.insert(T::example(), S::example());
+//        map
+//    }
+//}
 
 impl<T: std::cmp::Ord + AbiExample, S: AbiExample> AbiExample for BTreeMap<T, S> {
     fn example() -> Self {

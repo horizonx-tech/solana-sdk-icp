@@ -1,10 +1,11 @@
 #![cfg(feature = "full")]
 
+use solana_program::hash::Hash;
+
 pub use crate::message::{AddressLoader, SimpleAddressLoader};
 use {
     super::SanitizedVersionedTransaction,
     crate::{
-        hash::Hash,
         message::{
             legacy,
             v0::{self, LoadedAddresses},
