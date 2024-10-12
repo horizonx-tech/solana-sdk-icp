@@ -127,7 +127,7 @@
 //!         sol_log_(message.as_ptr(), message.len() as u64);
 //!     }
 //!
-//!     #[cfg(not(target_os = "solana"))]
+//!     
 //!     program_stubs::sol_log(message);
 //! }
 //! # mod program_stubs {
@@ -560,12 +560,10 @@ pub fn always_fail(_buf: &mut [u8]) -> Result<(), getrandom::Error> {
 ))]
 getrandom::register_custom_getrandom!(always_fail);
 
-#[cfg(target_os = "solana")]
-pub use solana_sdk_macro::wasm_bindgen_stub as wasm_bindgen;
 /// Re-export of [wasm-bindgen].
 ///
 /// [wasm-bindgen]: https://rustwasm.github.io/docs/wasm-bindgen/
-//#[cfg(not(target_os = "solana"))]
+//
 //pub use wasm_bindgen::prelude::wasm_bindgen;
 
 /// The [config native program][np].
@@ -784,7 +782,7 @@ macro_rules! unchecked_div_by_const {
 // `solana_program`'s top-level modules, if this module is not lexically last
 // rustdoc fails to generate documentation for the re-exports within
 // `solana_sdk`.
-#[cfg(not(target_os = "solana"))]
+
 pub mod example_mocks;
 
 #[cfg(test)]

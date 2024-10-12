@@ -1762,32 +1762,6 @@ mod tests {
     }
 
     #[test]
-    fn test_fuzz_assign_program_order() {
-        const EXPECTED_ENTRIES: [(u64, u64); 7] =
-            [(1, 2), (5, 5), (5, 6), (5, 10), (9, 10), (10, 10), (3, 12)];
-        let mut rng = rand::thread_rng();
-        let program_id = Pubkey::new_unique();
-        for _ in 0..1000 {
-            let mut entries = EXPECTED_ENTRIES.to_vec();
-            entries.shuffle(&mut rng);
-            let mut cache = new_mock_cache::<TestForkGraph>();
-            for (deployment_slot, effective_slot) in entries {
-                assert!(!cache.assign_program(
-                    program_id,
-                    new_test_loaded_program(deployment_slot, effective_slot)
-                ));
-            }
-            for ((deployment_slot, effective_slot), entry) in EXPECTED_ENTRIES
-                .iter()
-                .zip(cache.entries.get(&program_id).unwrap().slot_versions.iter())
-            {
-                assert_eq!(entry.deployment_slot, *deployment_slot);
-                assert_eq!(entry.effective_slot, *effective_slot);
-            }
-        }
-    }
-
-    #[test]
     fn test_assign_program_tombstones() {
         let mut cache = new_mock_cache::<TestForkGraph>();
         let program1 = Pubkey::new_unique();

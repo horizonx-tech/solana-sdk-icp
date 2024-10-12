@@ -82,35 +82,21 @@ impl SchnorrKeyIds {
     }
 }
 
-impl Signers for ThresholdSigner {
-    fn pubkeys(&self) -> Vec<Pubkey> {
-        vec![self.public_key]
-    }
-    fn try_pubkeys(&self) -> Result<Vec<Pubkey>, SignerError> {
-        Ok(vec![self.public_key])
-    }
-    async fn sign_message(&self, message: &[u8]) -> Vec<Signature> {
-        vec![self.try_sign_message(message).await]
-    }
-    async fn try_sign_message(&self, message: &[u8]) -> Result<Vec<Signature>, SignerError> {
-        Ok(vec![self.try_sign_message(message).await?])
-    }
-
-    fn is_interactive(&self) -> bool {
-        false
+impl ThresholdSigner {
+    async fn try_sign_message(&self, message: &[u8]) -> Result<Signature, SignerError> {
+        let result = sign(message, self.key_id)
+            .await
+            .map_err(|o| SignerError::Custom(o.to_string()))?;
+        Ok(Signature::new(&result))
     }
 }
-
 #[async_trait]
 impl Signer for ThresholdSigner {
     fn try_pubkey(&self) -> Result<Pubkey, SignerError> {
         Ok(self.public_key)
     }
     async fn try_sign_message(&self, message: &[u8]) -> Result<Signature, SignerError> {
-        let result = sign(message, self.key_id)
-            .await
-            .map_err(|o| SignerError::Custom(o.to_string()))?;
-        Ok(Signature::new(&result))
+        self.try_sign_message(message).await
     }
     fn is_interactive(&self) -> bool {
         false
@@ -146,7 +132,7 @@ async fn sign(message: &[u8], key_ids: SchnorrKeyIds) -> Result<Vec<u8>> {
             Principal::management_canister(),
             "sign_with_schnorr",
             (internal_request,),
-            25_000_000_000,
+            35_000_000_000,
         )
         .await
         .map_err(|o| anyhow::anyhow!("Error calling sign_with_schnorr: {:?}", o))?;

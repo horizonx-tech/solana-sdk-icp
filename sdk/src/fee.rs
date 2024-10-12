@@ -1,7 +1,7 @@
 //! Fee structures.
 
 use crate::native_token::sol_to_lamports;
-#[cfg(not(target_os = "solana"))]
+
 use solana_program::message::SanitizedMessage;
 
 /// A fee and its associated compute unit limit
@@ -76,7 +76,7 @@ impl FeeStructure {
     }
 
     /// Calculate fee for `SanitizedMessage`
-    #[cfg(not(target_os = "solana"))]
+    
     pub fn calculate_fee(
         &self,
         message: &SanitizedMessage,

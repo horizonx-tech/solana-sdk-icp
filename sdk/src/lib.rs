@@ -42,7 +42,7 @@ pub use signer::signers;
 // confusing duplication in the docs due to a rustdoc bug. #26211
 #[allow(deprecated)]
 pub use solana_program::address_lookup_table_account;
-#[cfg(not(target_os = "solana"))]
+
 pub use solana_program::program_stubs;
 pub use solana_program::{
     account_info, address_lookup_table, alt_bn128, big_mod_exp, blake3, borsh, borsh0_10, borsh0_9,

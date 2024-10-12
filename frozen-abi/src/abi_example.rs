@@ -220,9 +220,7 @@ atomic_example_impls! { AtomicI64 }
 atomic_example_impls! { AtomicIsize }
 atomic_example_impls! { AtomicBool }
 
-#[cfg(not(target_os = "solana"))]
 use generic_array::{ArrayLength, GenericArray};
-#[cfg(not(target_os = "solana"))]
 impl<T: Default, U: ArrayLength<T>> AbiExample for GenericArray<T, U> {
     fn example() -> Self {
         Self::default()
@@ -403,7 +401,7 @@ impl<
     }
 }
 
-//#[cfg(not(target_os = "solana"))]
+//
 //impl<
 //        T: Clone + std::cmp::Eq + std::hash::Hash + AbiExample,
 //        S: Clone + AbiExample,
@@ -480,21 +478,18 @@ impl<T: std::cmp::Ord + AbiExample> AbiExample for BTreeSet<T> {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
 impl AbiExample for memmap2::MmapMut {
     fn example() -> Self {
         memmap2::MmapMut::map_anon(1).expect("failed to map the data file")
     }
 }
 
-#[cfg(not(target_os = "solana"))]
 impl AbiExample for std::path::PathBuf {
     fn example() -> Self {
         std::path::PathBuf::from(String::example())
     }
 }
 
-#[cfg(not(target_os = "solana"))]
 impl AbiExample for std::time::SystemTime {
     fn example() -> Self {
         std::time::SystemTime::UNIX_EPOCH
@@ -615,7 +610,6 @@ impl<O: AbiEnumVisitor, E: AbiEnumVisitor> AbiEnumVisitor for Result<O, E> {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
 impl<T: AbiExample> AbiExample for std::sync::OnceLock<T> {
     fn example() -> Self {
         Self::from(T::example())

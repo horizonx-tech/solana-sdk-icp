@@ -210,7 +210,7 @@ pub fn hashv(
 ) -> Result<PoseidonHash, PoseidonSyscallError> {
     // Perform the calculation inline, calling this from within a program is
     // not supported.
-    #[cfg(not(target_os = "solana"))]
+
     {
         use {
             ark_bn254::Fr,
@@ -252,25 +252,6 @@ pub fn hashv(
         .map_err(PoseidonSyscallError::from)?;
 
         Ok(PoseidonHash(res))
-    }
-    // Call via a system call to perform the calculation.
-    #[cfg(target_os = "solana")]
-    {
-        let mut hash_result = [0; HASH_BYTES];
-        let result = unsafe {
-            crate::syscalls::sol_poseidon(
-                parameters.into(),
-                endianness.into(),
-                vals as *const _ as *const u8,
-                vals.len() as u64,
-                &mut hash_result as *mut _ as *mut u8,
-            )
-        };
-
-        match result {
-            0 => Ok(PoseidonHash::new(hash_result)),
-            _ => Err(PoseidonSyscallError::Unexpected),
-        }
     }
 }
 

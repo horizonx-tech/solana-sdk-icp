@@ -1,4 +1,4 @@
-#[cfg(not(target_os = "solana"))]
+
 use crate::{
     address_lookup_table_account::AddressLookupTableAccount,
     message::v0::{LoadedAddresses, MessageAddressTableLookup},
@@ -116,7 +116,7 @@ impl CompiledKeys {
         Ok((header, static_account_keys))
     }
 
-    #[cfg(not(target_os = "solana"))]
+    
     pub(crate) fn try_extract_table_lookup(
         &mut self,
         lookup_table_account: &AddressLookupTableAccount,
@@ -148,7 +148,7 @@ impl CompiledKeys {
         )))
     }
 
-    #[cfg(not(target_os = "solana"))]
+    
     fn try_drain_keys_found_in_lookup_table(
         &mut self,
         lookup_table_addresses: &[Pubkey],

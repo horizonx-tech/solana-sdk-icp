@@ -422,7 +422,7 @@ impl Secp256k1Pubkey {
 //        }
 //    }
 //
-//    //#[cfg(not(target_os = "solana"))]
+//    //
 //    //{
 //    //    let message = libsecp256k1::Message::parse_slice(hash)
 //    //        .map_err(|_| Secp256k1RecoverError::InvalidHash)?;

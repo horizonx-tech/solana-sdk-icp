@@ -2,12 +2,6 @@
 //!
 //! This module is mostly empty when not compiling for BPF targets.
 
-#[cfg(target_os = "solana")]
-mod definitions;
-
-#[cfg(target_os = "solana")]
-pub use definitions::*;
-
 /// Maximum CPI instruction data size. 10 KiB was chosen to ensure that CPI
 /// instructions are not more limited than transaction instructions if the size
 /// of transactions is doubled in the future.

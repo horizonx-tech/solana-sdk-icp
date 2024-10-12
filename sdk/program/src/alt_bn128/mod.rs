@@ -94,7 +94,6 @@ pub struct PodG1(pub [u8; 64]);
 #[repr(transparent)]
 pub struct PodG2(pub [u8; 128]);
 
-#[cfg(not(target_os = "solana"))]
 mod target_arch {
     use {
         super::*,
@@ -300,74 +299,6 @@ mod target_arch {
             .chunks(64)
             .flat_map(|b| b.iter().copied().rev().collect::<Vec<u8>>())
             .collect::<Vec<u8>>()
-    }
-}
-
-#[cfg(target_os = "solana")]
-mod target_arch {
-    use super::*;
-    pub fn alt_bn128_addition(input: &[u8]) -> Result<Vec<u8>, AltBn128Error> {
-        if input.len() > ALT_BN128_ADDITION_INPUT_LEN {
-            return Err(AltBn128Error::InvalidInputData);
-        }
-        let mut result_buffer = [0; ALT_BN128_ADDITION_OUTPUT_LEN];
-        let result = unsafe {
-            crate::syscalls::sol_alt_bn128_group_op(
-                ALT_BN128_ADD,
-                input as *const _ as *const u8,
-                input.len() as u64,
-                &mut result_buffer as *mut _ as *mut u8,
-            )
-        };
-
-        match result {
-            0 => Ok(result_buffer.to_vec()),
-            _ => Err(AltBn128Error::UnexpectedError),
-        }
-    }
-
-    pub fn alt_bn128_multiplication(input: &[u8]) -> Result<Vec<u8>, AltBn128Error> {
-        if input.len() > ALT_BN128_MULTIPLICATION_INPUT_LEN {
-            return Err(AltBn128Error::InvalidInputData);
-        }
-        let mut result_buffer = [0u8; ALT_BN128_POINT_SIZE];
-        let result = unsafe {
-            crate::syscalls::sol_alt_bn128_group_op(
-                ALT_BN128_MUL,
-                input as *const _ as *const u8,
-                input.len() as u64,
-                &mut result_buffer as *mut _ as *mut u8,
-            )
-        };
-
-        match result {
-            0 => Ok(result_buffer.to_vec()),
-            _ => Err(AltBn128Error::UnexpectedError),
-        }
-    }
-
-    pub fn alt_bn128_pairing(input: &[u8]) -> Result<Vec<u8>, AltBn128Error> {
-        if input
-            .len()
-            .checked_rem(consts::ALT_BN128_PAIRING_ELEMENT_LEN)
-            .is_none()
-        {
-            return Err(AltBn128Error::InvalidInputData);
-        }
-        let mut result_buffer = [0u8; 32];
-        let result = unsafe {
-            crate::syscalls::sol_alt_bn128_group_op(
-                ALT_BN128_PAIRING,
-                input as *const _ as *const u8,
-                input.len() as u64,
-                &mut result_buffer as *mut _ as *mut u8,
-            )
-        };
-
-        match result {
-            0 => Ok(result_buffer.to_vec()),
-            _ => Err(AltBn128Error::UnexpectedError),
-        }
     }
 }
 
