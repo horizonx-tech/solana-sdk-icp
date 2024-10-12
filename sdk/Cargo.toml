@@ -1,6 +1,6 @@
 [package]
-name = "solana-sdk"
-description = "Solana SDK"
+name = "solana-sdk-icp"
+description = "Solana SDK on Internet Computer"
 documentation = "https://docs.rs/solana-sdk"
 readme = "README.md"
 version = { workspace = true }
@@ -29,7 +29,6 @@ full = [
     "ed25519-dalek",
     "ed25519-dalek-bip32",
     "solana-logger",
-#    "libsecp256k1",
     "sha3",
     "digest",
 ]
@@ -91,7 +90,7 @@ async-trait.workspace = true
 anyhow = { workspace = true }
 curve25519-dalek = { workspace = true }
 hex = { workspace = true }
-solana-sdk = { path = ".", features = ["dev-context-only-utils"] }
+solana-sdk-icp = { path = ".", features = ["dev-context-only-utils"] }
 static_assertions = { workspace = true }
 #tiny-bip39 = { workspace = true }
 tokio-test = "0.4.4"
