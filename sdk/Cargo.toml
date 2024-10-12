@@ -1,5 +1,5 @@
 [package]
-name = "solana-sdk-icp"
+name = "solana-sdk"
 description = "Solana SDK on Internet Computer"
 documentation = "https://docs.rs/solana-sdk"
 readme = "README.md"
@@ -90,7 +90,7 @@ async-trait.workspace = true
 anyhow = { workspace = true }
 curve25519-dalek = { workspace = true }
 hex = { workspace = true }
-solana-sdk-icp = { path = ".", features = ["dev-context-only-utils"] }
+solana-sdk = { path = ".", features = ["dev-context-only-utils"] }
 static_assertions = { workspace = true }
 #tiny-bip39 = { workspace = true }
 tokio-test = "0.4.4"
