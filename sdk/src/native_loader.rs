@@ -1,5 +1,7 @@
 //! The native loader native program.
 
+use solana_sdk_macro::declare_id;
+
 use crate::{
     account::{
         Account, AccountSharedData, InheritableAccountFields, DUMMY_INHERITABLE_ACCOUNT_FIELDS,
@@ -7,7 +9,7 @@ use crate::{
     clock::INITIAL_RENT_EPOCH,
 };
 
-crate::declare_id!("NativeLoader1111111111111111111111111111111");
+declare_id!("NativeLoader1111111111111111111111111111111");
 
 /// Create an executable account with the given shared object name.
 #[deprecated(
