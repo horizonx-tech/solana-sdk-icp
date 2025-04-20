@@ -12,8 +12,8 @@ use {
 pub trait Signers {
     fn pubkeys(&self) -> Vec<Pubkey>;
     fn try_pubkeys(&self) -> Result<Vec<Pubkey>, SignerError>;
-    async fn sign_message(&self, message: &[u8]) -> Vec<Signature>;
-    async fn try_sign_message(&self, message: &[u8]) -> Result<Vec<Signature>, SignerError>;
+    fn sign_message(&self, message: &[u8]) -> impl std::future::Future<Output = Vec<Signature>> + Send;
+    fn try_sign_message(&self, message: &[u8]) -> impl std::future::Future<Output = Result<Vec<Signature>, SignerError>> + Send;
     fn is_interactive(&self) -> bool;
 }
 

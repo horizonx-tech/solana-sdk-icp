@@ -1092,36 +1092,37 @@ impl<FG: ForkGraph> LoadedPrograms<FG> {
 
     /// Evicts programs using 2's random selection, choosing the least used program out of the two entries.
     /// The eviction is performed enough number of times to reduce the cache usage to the given percentage.
-    pub fn evict_using_2s_random_selection(&mut self, shrink_to: PercentageInteger, now: Slot) {
-        let mut candidates = self.get_flattened_entries(true, true);
-        let num_to_unload = candidates
-            .len()
-            .saturating_sub(shrink_to.apply_to(MAX_LOADED_ENTRY_COUNT));
-        fn random_index_and_usage_counter(
-            candidates: &[(Pubkey, Arc<LoadedProgram>)],
-            now: Slot,
-        ) -> (usize, u64) {
-            let mut rng = thread_rng();
-            let index = rng.gen_range(0..candidates.len());
-            let usage_counter = candidates
-                .get(index)
-                .expect("Failed to get cached entry")
-                .1
-                .decayed_usage_counter(now);
-            (index, usage_counter)
-        }
+    pub fn evict_using_2s_random_selection(&mut self, _shrink_to: PercentageInteger, _now: Slot) {
+        unimplemented!()
+       //let mut candidates = self.get_flattened_entries(true, true);
+       //let num_to_unload = candidates
+       //    .len()
+       //    .saturating_sub(shrink_to.apply_to(MAX_LOADED_ENTRY_COUNT));
+       //fn random_index_and_usage_counter(
+       //    candidates: &[(Pubkey, Arc<LoadedProgram>)],
+       //    now: Slot,
+       //) -> (usize, u64) {
+       //    let mut rng = thread_rng();
+       //    let index = rng.gen_range(0..candidates.len());
+       //    let usage_counter = candidates
+       //        .get(index)
+       //        .expect("Failed to get cached entry")
+       //        .1
+       //        .decayed_usage_counter(now);
+       //    (index, usage_counter)
+       //}
 
-        for _ in 0..num_to_unload {
-            let (index1, usage_counter1) = random_index_and_usage_counter(&candidates, now);
-            let (index2, usage_counter2) = random_index_and_usage_counter(&candidates, now);
+       //for _ in 0..num_to_unload {
+       //    let (index1, usage_counter1) = random_index_and_usage_counter(&candidates, now);
+       //    let (index2, usage_counter2) = random_index_and_usage_counter(&candidates, now);
 
-            let (program, entry) = if usage_counter1 < usage_counter2 {
-                candidates.swap_remove(index1)
-            } else {
-                candidates.swap_remove(index2)
-            };
-            self.unload_program_entry(&program, &entry);
-        }
+       //    let (program, entry) = if usage_counter1 < usage_counter2 {
+       //        candidates.swap_remove(index1)
+       //    } else {
+       //        candidates.swap_remove(index2)
+       //    };
+       //    self.unload_program_entry(&program, &entry);
+       //}
     }
 
     /// Removes all the entries at the given keys, if they exist
