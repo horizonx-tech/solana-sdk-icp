@@ -2796,7 +2796,6 @@ dependencies = [
  "bytemuck",
  "cc",
  "curve25519-dalek 4.1.3",
- "getrandom 0.2.16",
  "itertools",
  "lazy_static",
  "libc",
