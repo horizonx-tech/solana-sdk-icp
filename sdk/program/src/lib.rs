@@ -553,12 +553,6 @@ pub fn always_fail(_buf: &mut [u8]) -> Result<(), getrandom::Error> {
     Err(getrandom::Error::UNSUPPORTED)
 }
 
-#[cfg(all(
-    target_arch = "wasm32",
-    target_vendor = "unknown",
-    target_os = "unknown"
-))]
-getrandom::register_custom_getrandom!(always_fail);
 
 /// Re-export of [wasm-bindgen].
 ///
