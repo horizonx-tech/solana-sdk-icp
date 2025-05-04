@@ -54,7 +54,10 @@ struct ManagementCanisterSignatureReply {
 impl ThresholdSigner {
     pub async fn new(key_id: SchnorrKeyIds) -> Result<Self> {
         let public_key = get_public_key(key_id).await?;
-        Ok(Self { key_id, public_key })
+        Ok(Self::new_with_public_key(key_id, public_key))
+    }
+    pub fn new_with_public_key(key_id: SchnorrKeyIds, public_key: Pubkey) -> Self {
+        Self { key_id, public_key }
     }
 }
 
@@ -103,7 +106,7 @@ impl Signer for ThresholdSigner {
     }
 }
 
-async fn get_public_key(key_id: SchnorrKeyIds) -> Result<Pubkey> {
+pub async fn get_public_key(key_id: SchnorrKeyIds) -> Result<Pubkey> {
     let request = ManagementCanisterSchnorrPublicKeyRequest {
         canister_id: None,
         derivation_path: vec![ic_cdk::api::caller().as_slice().to_vec()],
