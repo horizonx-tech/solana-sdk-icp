@@ -109,7 +109,7 @@ impl Signer for ThresholdSigner {
 pub async fn get_public_key(key_id: SchnorrKeyIds) -> Result<Pubkey> {
     let request = ManagementCanisterSchnorrPublicKeyRequest {
         canister_id: None,
-        derivation_path: vec![ic_cdk::api::caller().as_slice().to_vec()],
+        derivation_path: vec![ic_cdk::api::id().as_slice().to_vec()],
         key_id: key_id.to_key_id(SchnorrAlgorithm::Ed25519),
     };
 
@@ -126,7 +126,7 @@ pub async fn get_public_key(key_id: SchnorrKeyIds) -> Result<Pubkey> {
 async fn sign(message: &[u8], key_ids: SchnorrKeyIds) -> Result<Vec<u8>> {
     let internal_request = ManagementCanisterSignatureRequest {
         message: message.to_vec(),
-        derivation_path: vec![ic_cdk::api::caller().as_slice().to_vec()],
+        derivation_path: vec![ic_cdk::api::id().as_slice().to_vec()],
         key_id: key_ids.to_key_id(SchnorrAlgorithm::Ed25519),
     };
 
